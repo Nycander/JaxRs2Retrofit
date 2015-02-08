@@ -1,4 +1,4 @@
-package de.bitdroid.jaxrstoretrofit;
+package de.bitdroid.jaxrs2retrofit;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;

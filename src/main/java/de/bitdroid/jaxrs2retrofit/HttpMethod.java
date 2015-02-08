@@ -1,4 +1,4 @@
-package de.bitdroid.jaxrstoretrofit;
+package de.bitdroid.jaxrs2retrofit;
 
 
 public enum HttpMethod {
