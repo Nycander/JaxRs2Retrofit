@@ -58,14 +58,14 @@ public final class Main {
 		builder.addSourceTree(inputFile);
 
 		for (JavaClass javaClass : builder.getClasses()) {
-			JavaFile javaFile = generateResource(javaClass);
+			JavaFile javaFile = createResource(javaClass);
 			if (javaFile == null) continue;
 			javaFile.writeTo(System.out);
 		}
 	}
 
 
-	private static JavaFile generateResource(JavaClass jaxRsClass) {
+	private static JavaFile createResource(JavaClass jaxRsClass) {
 		// find path annotation
 		JavaAnnotation jaxRsPath = null;
 		for (JavaAnnotation annotation : jaxRsClass.getAnnotations()) {
@@ -81,7 +81,7 @@ public final class Main {
 				.addModifiers(Modifier.PUBLIC);
 
 		for (JavaMethod jaxRsMethod : jaxRsClass.getMethods()) {
-			MethodSpec retrofitMethod = generateMethod(jaxRsClass, jaxRsMethod, jaxRsPath);
+			MethodSpec retrofitMethod = createMethod(jaxRsClass, jaxRsMethod, jaxRsPath);
 			if (retrofitMethod != null) retrofitResourceBuilder.addMethod(retrofitMethod);
 		}
 
@@ -89,7 +89,7 @@ public final class Main {
 	}
 
 
-	private static MethodSpec generateMethod(
+	private static MethodSpec createMethod(
 			JavaClass jaxRsClass,
 			JavaMethod jaxRsMethod,
 			JavaAnnotation jaxRsPath) {
