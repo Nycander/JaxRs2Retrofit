@@ -5,6 +5,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.thoughtworks.qdox.JavaProjectBuilder;
@@ -13,6 +14,8 @@ import com.thoughtworks.qdox.model.JavaAnnotation;
 import com.thoughtworks.qdox.model.JavaClass;
 import com.thoughtworks.qdox.model.JavaMethod;
 import com.thoughtworks.qdox.model.JavaParameter;
+import com.thoughtworks.qdox.model.JavaParameterizedType;
+import com.thoughtworks.qdox.model.JavaType;
 import com.thoughtworks.qdox.model.expression.Add;
 import com.thoughtworks.qdox.model.expression.AnnotationValue;
 
@@ -25,6 +28,8 @@ import java.io.File;
 
 import javax.lang.model.element.Modifier;
 import javax.ws.rs.Path;
+
+import retrofit.client.Response;
 
 public final class Main {
 
@@ -108,12 +113,9 @@ public final class Main {
 				.addAnnotation(createPathAnnotation(jaxRsClass, httpMethod, jaxRsPath, jaxRsMethodPath));
 
 		// create return type
-		String jaxRsReturnType = jaxRsMethod.getReturnType().getFullyQualifiedName();
-		TypeName retrofitReturnType;
-		if ("void".equals(jaxRsReturnType)) {
-			retrofitReturnType = TypeName.VOID;
-		} else {
-			retrofitReturnType = ClassName.bestGuess(jaxRsMethod.getReturnType().getFullyQualifiedName());
+		TypeName retrofitReturnType = createType(jaxRsMethod.getReturnType());
+		if (retrofitReturnType.equals(TypeName.VOID)) {
+			retrofitReturnType = ClassName.get(Response.class);
 		}
 		retrofitMethodBuilder.returns(retrofitReturnType);
 
@@ -141,8 +143,7 @@ public final class Main {
 		}
 		if (parameterType == null) parameterType = ParameterType.BODY; // if none found assume that it belongs into the body
 
-		ClassName retrofitParamClassName = ClassName
-				.bestGuess(jaxRsParameter.getJavaClass().getFullyQualifiedName());
+		TypeName retrofitParamClassName = createType(jaxRsParameter.getJavaClass());
 		ParameterSpec.Builder retrofitParamBuilder = ParameterSpec
 				.builder(retrofitParamClassName, jaxRsParameter.getName());
 
@@ -166,6 +167,27 @@ public final class Main {
 		return AnnotationSpec.builder(method.getRetrofitClass())
 				.addMember("value", "\"" + pathExpression.accept(evaluatingVisitor).toString() + "\"")
 				.build();
+	}
+
+
+	private static TypeName createType(JavaType jaxRsType) {
+		if (jaxRsType.equals(JavaType.VOID)) {
+			return TypeName.VOID;
+		} else if (jaxRsType instanceof JavaParameterizedType) {
+			JavaParameterizedType parametrizedType = (JavaParameterizedType) jaxRsType;
+			if (parametrizedType.getActualTypeArguments().size() == 0) {
+				return ClassName.bestGuess(jaxRsType.getFullyQualifiedName());
+			}
+
+			ClassName outerType = ClassName.bestGuess(parametrizedType.getFullyQualifiedName());
+			TypeName[] paramTypes = new TypeName[parametrizedType.getActualTypeArguments().size()];
+			for (int i = 0; i < paramTypes.length; ++i) {
+				paramTypes[i] = ClassName.bestGuess(parametrizedType.getActualTypeArguments().get(i).getFullyQualifiedName());
+			}
+			return ParameterizedTypeName.get(outerType, paramTypes);
+		} else {
+			return ClassName.bestGuess(jaxRsType.getFullyQualifiedName());
+		}
 	}
 
 
