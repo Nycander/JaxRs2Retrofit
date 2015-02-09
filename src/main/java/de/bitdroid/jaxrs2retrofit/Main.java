@@ -11,13 +11,10 @@ import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.builder.impl.EvaluatingVisitor;
 import com.thoughtworks.qdox.model.JavaAnnotation;
 import com.thoughtworks.qdox.model.JavaClass;
-import com.thoughtworks.qdox.model.JavaField;
 import com.thoughtworks.qdox.model.JavaMethod;
-import com.thoughtworks.qdox.model.JavaPackage;
 import com.thoughtworks.qdox.model.JavaParameter;
 import com.thoughtworks.qdox.model.expression.Add;
 import com.thoughtworks.qdox.model.expression.AnnotationValue;
-import com.thoughtworks.qdox.model.expression.FieldRef;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -56,88 +53,107 @@ public final class Main {
 		builder.addSourceTree(inputFile);
 
 		for (JavaClass javaClass : builder.getClasses()) {
-			JavaFile javaFile = generateClientForClass(javaClass);
+			JavaFile javaFile = generateResource(javaClass);
 			if (javaFile == null) continue;
 			javaFile.writeTo(System.out);
 		}
 	}
 
 
-	private static JavaFile generateClientForClass(JavaClass inputClass) {
+	private static JavaFile generateResource(JavaClass jaxRsClass) {
 		// find path annotation
-		JavaAnnotation path = null;
-		for (JavaAnnotation annotation : inputClass.getAnnotations()) {
+		JavaAnnotation jaxRsPath = null;
+		for (JavaAnnotation annotation : jaxRsClass.getAnnotations()) {
 			if (annotation.getType().getFullyQualifiedName().equals(Path.class.getName())) {
-				path = annotation;
+				jaxRsPath = annotation;
 				break;
 			}
 		}
-		if (path == null) return null;
+		if (jaxRsPath == null) return null; // no a valid JAX RS resource
 
-		TypeSpec.Builder resourceBuilder = TypeSpec.interfaceBuilder(inputClass.getName())
+		TypeSpec.Builder retrofitResourceBuilder = TypeSpec
+				.interfaceBuilder(jaxRsClass.getName())
 				.addModifiers(Modifier.PUBLIC);
 
-		for (JavaMethod method : inputClass.getMethods()) {
-			MethodSpec.Builder methodBuilder =  MethodSpec
-					.methodBuilder(method.getName())
-					.addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
-
-			// find method type and path
-			JavaAnnotation methodPath = null;
-			HttpMethod httpMethod = null;
-			for (JavaAnnotation annotation : method.getAnnotations()) {
-				if (annotation.getType().getFullyQualifiedName().equals(Path.class.getName())) {
-					methodPath = annotation;
-				} else {
-					for (HttpMethod m : HttpMethod.values()) {
-						if (m.getJaxRsClass().getName().equals(annotation.getType().getFullyQualifiedName())) {
-							httpMethod = m;
-							break;
-						}
-					}
-				}
-			}
-			if (httpMethod == null) continue;
-			methodBuilder.addAnnotation(createPathAnnotation(inputClass, httpMethod, path, methodPath));
-
-			// parse parameters
-			for (JavaParameter parameter : method.getParameters()) {
-				JavaAnnotation paramAnnotation = null;
-				ParameterType parameterType = null;
-
-				for (JavaAnnotation annotation : parameter.getAnnotations()) {
-					for (ParameterType type : ParameterType.values()) {
-						if (type.getJaxRsClass() == null) continue;
-						if (annotation.getType().getFullyQualifiedName().equals(type.getJaxRsClass().getName())) {
-							paramAnnotation =  annotation;
-							parameterType = type;
-							break;
-						}
-					}
-					if (parameterType == null) parameterType = ParameterType.BODY;
-
-					ClassName paramClassName = ClassName.bestGuess(parameter.getJavaClass().getFullyQualifiedName());
-					ParameterSpec.Builder paramBuilder = ParameterSpec.builder(paramClassName, parameter.getName());
-
-					AnnotationSpec.Builder paramAnnotationBuilder = AnnotationSpec.builder(parameterType.getRetrofitClass());
-					if (paramAnnotation != null) paramAnnotationBuilder.addMember("value", paramAnnotation.getNamedParameter("value").toString());
-					paramBuilder.addAnnotation(paramAnnotationBuilder.build());
-
-					methodBuilder.addParameter(paramBuilder.build());
-				}
-			}
-
-			// create return type
-			String returnType = method.getReturnType().getFullyQualifiedName();
-			TypeName retrofitReturnType;
-			if ("void".equals(returnType)) retrofitReturnType = TypeName.VOID;
-			else retrofitReturnType = ClassName.bestGuess(method.getReturnType().getFullyQualifiedName());
-			methodBuilder.returns(retrofitReturnType);
-
-			resourceBuilder.addMethod(methodBuilder.build());
+		for (JavaMethod jaxRsMethod : jaxRsClass.getMethods()) {
+			MethodSpec retrofitMethod = generateMethod(jaxRsClass, jaxRsMethod, jaxRsPath);
+			if (retrofitMethod != null) retrofitResourceBuilder.addMethod(retrofitMethod);
 		}
 
-		return JavaFile.builder(inputClass.getPackageName(), resourceBuilder.build()).build();
+		return JavaFile.builder(jaxRsClass.getPackageName(), retrofitResourceBuilder.build()).build();
+	}
+
+
+	private static MethodSpec generateMethod(
+			JavaClass jaxRsClass,
+			JavaMethod jaxRsMethod,
+			JavaAnnotation jaxRsPath) {
+
+		MethodSpec.Builder retrofitMethodBuilder = MethodSpec
+				.methodBuilder(jaxRsMethod.getName())
+				.addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
+
+		// find method type and path
+		JavaAnnotation jaxRsMethodPath = null;
+		HttpMethod httpMethod = null;
+		for (JavaAnnotation annotation : jaxRsMethod.getAnnotations()) {
+			if (annotation.getType().getFullyQualifiedName().equals(Path.class.getName())) {
+				jaxRsMethodPath = annotation;
+			} else {
+				httpMethod = HttpMethod.forJaxRsClassName(annotation.getType().getFullyQualifiedName());
+			}
+		}
+		if (httpMethod == null) return null; // not a valid resource method
+		retrofitMethodBuilder
+				.addAnnotation(createPathAnnotation(jaxRsClass, httpMethod, jaxRsPath, jaxRsMethodPath));
+
+		// create return type
+		String jaxRsReturnType = jaxRsMethod.getReturnType().getFullyQualifiedName();
+		TypeName retrofitReturnType;
+		if ("void".equals(jaxRsReturnType)) {
+			retrofitReturnType = TypeName.VOID;
+		} else {
+			retrofitReturnType = ClassName.bestGuess(jaxRsMethod.getReturnType().getFullyQualifiedName());
+		}
+		retrofitMethodBuilder.returns(retrofitReturnType);
+
+		// create parameters
+		for (JavaParameter jaxRsParameter : jaxRsMethod.getParameters()) {
+			retrofitMethodBuilder.addParameter(createParameter(jaxRsParameter));
+		}
+
+		return retrofitMethodBuilder.build();
+	}
+
+
+	private static ParameterSpec createParameter(
+			JavaParameter jaxRsParameter) {
+
+		JavaAnnotation jaxRsAnnotation = null;
+		ParameterType parameterType = null;
+
+		for (JavaAnnotation annotation : jaxRsParameter.getAnnotations()) {
+			parameterType = ParameterType.forJaxRsClassName(annotation.getType().getFullyQualifiedName());
+			if (parameterType != null) {
+				jaxRsAnnotation = annotation;
+				break;
+			}
+		}
+		if (parameterType == null) parameterType = ParameterType.BODY; // if none found assume that it belongs into the body
+
+		ClassName retrofitParamClassName = ClassName
+				.bestGuess(jaxRsParameter.getJavaClass().getFullyQualifiedName());
+		ParameterSpec.Builder retrofitParamBuilder = ParameterSpec
+				.builder(retrofitParamClassName, jaxRsParameter.getName());
+
+		AnnotationSpec.Builder retrofitParamAnnotationBuilder = AnnotationSpec
+				.builder(parameterType.getRetrofitClass());
+
+		if (jaxRsAnnotation != null) {
+			retrofitParamAnnotationBuilder.addMember("value", jaxRsAnnotation.getNamedParameter("value").toString());
+		}
+		retrofitParamBuilder.addAnnotation(retrofitParamAnnotationBuilder.build());
+		return retrofitParamBuilder.build();
 	}
 
 
@@ -156,47 +172,6 @@ public final class Main {
 	private static void printHelp() {
 		HelpFormatter helpFormatter = new HelpFormatter();
 		helpFormatter.printHelp(Main.class.getSimpleName(), commandLineOptions);
-	}
-
-
-	private static class SimpleEvaluatingVisitor extends EvaluatingVisitor {
-
-		private final JavaClass context;
-
-		public SimpleEvaluatingVisitor(JavaClass context) {
-			this.context = context;
-		}
-
-		@Override
-		public Object getFieldReferenceValue(JavaField field) {
-			String expression = field.getInitializationExpression();
-			if (expression.startsWith("\"")) expression = expression.substring(1);
-			if (expression.endsWith("\"")) expression = expression.substring(0, expression.length() - 1);
-			return expression;
-		}
-
-
-		@Override
-		public Object visit(FieldRef fieldRef) {
-			try {
-				return super.visit(fieldRef);
-			} catch (IllegalArgumentException iae) {
-				// let's try again! (some refs are not found unfortunately ...)
-				JavaPackage currentPackage = context.getPackage();
-				JavaClass targetClass = null;
-				for (JavaClass c : currentPackage.getClasses()) {
-					if (c.getName().equals(fieldRef.getNamePart(0))) {
-						targetClass = c;
-					}
-				}
-
-				if (targetClass == null) throw iae;
-
-				JavaField field = targetClass.getFieldByName(fieldRef.getNamePart(1));
-				return getFieldReferenceValue(field);
-			}
-		}
-
 	}
 
 }
