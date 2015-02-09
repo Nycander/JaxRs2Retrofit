@@ -34,7 +34,7 @@ public final class Main {
 			return;
 		}
 
-		RetrofitGenerator generator = new RetrofitGenerator();
+		RetrofitGenerator generator = new RetrofitGenerator(RetrofitReturnStrategy.BOTH);
 		JavaProjectBuilder builder = new JavaProjectBuilder();
 		builder.addSourceTree(inputFile);
 

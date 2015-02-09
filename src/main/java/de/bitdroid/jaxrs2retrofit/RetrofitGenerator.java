@@ -18,12 +18,23 @@ import com.thoughtworks.qdox.model.JavaType;
 import com.thoughtworks.qdox.model.expression.Add;
 import com.thoughtworks.qdox.model.expression.AnnotationValue;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.lang.model.element.Modifier;
 import javax.ws.rs.Path;
 
+import retrofit.Callback;
 import retrofit.client.Response;
 
 public final class RetrofitGenerator {
+
+	private final RetrofitReturnStrategy retrofitReturnStrategy;
+
+	public RetrofitGenerator(RetrofitReturnStrategy retrofitReturnStrategy) {
+		this.retrofitReturnStrategy = retrofitReturnStrategy;
+	}
+
 
 	public JavaFile createResource(JavaClass jaxRsClass) {
 		// find path annotation
@@ -41,19 +52,24 @@ public final class RetrofitGenerator {
 				.addModifiers(Modifier.PUBLIC);
 
 		for (JavaMethod jaxRsMethod : jaxRsClass.getMethods()) {
-			MethodSpec retrofitMethod = createMethod(jaxRsClass, jaxRsMethod, jaxRsPath);
-			if (retrofitMethod != null) retrofitResourceBuilder.addMethod(retrofitMethod);
+			List<MethodSpec> retrofitMethods = createMethod(jaxRsClass, jaxRsMethod, jaxRsPath);
+			if (retrofitMethods != null) {
+				for (MethodSpec method : retrofitMethods) {
+					retrofitResourceBuilder.addMethod(method);
+				}
+			}
 		}
 
 		return JavaFile.builder(jaxRsClass.getPackageName(), retrofitResourceBuilder.build()).build();
 	}
 
 
-	private MethodSpec createMethod(
+	private List<MethodSpec> createMethod(
 			JavaClass jaxRsClass,
 			JavaMethod jaxRsMethod,
 			JavaAnnotation jaxRsPath) {
 
+		List<MethodSpec> retrofitMethods = new LinkedList<>();
 		MethodSpec.Builder retrofitMethodBuilder = MethodSpec
 				.methodBuilder(jaxRsMethod.getName())
 				.addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
@@ -72,19 +88,30 @@ public final class RetrofitGenerator {
 		retrofitMethodBuilder
 				.addAnnotation(createPathAnnotation(jaxRsClass, httpMethod, jaxRsPath, jaxRsMethodPath));
 
-		// create return type
-		TypeName retrofitReturnType = createType(jaxRsMethod.getReturnType());
-		if (retrofitReturnType.equals(TypeName.VOID)) {
-			retrofitReturnType = ClassName.get(Response.class);
-		}
-		retrofitMethodBuilder.returns(retrofitReturnType);
-
 		// create parameters
 		for (JavaParameter jaxRsParameter : jaxRsMethod.getParameters()) {
 			retrofitMethodBuilder.addParameter(createParameter(jaxRsParameter));
 		}
 
-		return retrofitMethodBuilder.build();
+		// create return type
+		TypeName retrofitReturnType = createType(jaxRsMethod.getReturnType());
+		if (retrofitReturnType.equals(TypeName.VOID)) {
+			retrofitReturnType = ClassName.get(Response.class);
+		}
+		if (RetrofitReturnStrategy.REGULAR.equals(retrofitReturnStrategy) || RetrofitReturnStrategy.BOTH.equals(retrofitReturnStrategy)) {
+			retrofitMethodBuilder.returns(retrofitReturnType);
+			retrofitMethods.add(retrofitMethodBuilder.build());
+		}
+		if (RetrofitReturnStrategy.CALLBACK.equals(retrofitReturnStrategy) || RetrofitReturnStrategy.BOTH.equals(retrofitReturnStrategy)) {
+			ParameterSpec callback = ParameterSpec
+					.builder(ParameterizedTypeName.get(ClassName.get(Callback.class), retrofitReturnType), "callback")
+					.build();
+			retrofitMethodBuilder.addParameter(callback);
+			retrofitMethodBuilder.returns(TypeName.VOID);
+			retrofitMethods.add(retrofitMethodBuilder.build());
+		}
+
+		return retrofitMethods;
 	}
 
 
