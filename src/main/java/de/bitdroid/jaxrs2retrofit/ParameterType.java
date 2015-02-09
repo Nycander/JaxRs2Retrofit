@@ -4,16 +4,19 @@ package de.bitdroid.jaxrs2retrofit;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import retrofit.http.Body;
+import retrofit.http.Header;
 import retrofit.http.Path;
 import retrofit.http.Query;
 
 public enum ParameterType {
 
 	PATH(PathParam.class, Path.class),
+	HEADER(HeaderParam.class, Header.class),
 	QUERY(QueryParam.class, Query.class),
 	BODY(null, Body.class);
 
