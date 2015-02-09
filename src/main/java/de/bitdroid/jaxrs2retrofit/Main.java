@@ -17,6 +17,7 @@ import com.thoughtworks.qdox.model.JavaPackage;
 import com.thoughtworks.qdox.model.JavaParameter;
 import com.thoughtworks.qdox.model.expression.Add;
 import com.thoughtworks.qdox.model.expression.AnnotationValue;
+import com.thoughtworks.qdox.model.expression.FieldRef;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -37,6 +38,7 @@ public final class Main {
 		commandLineOptions.addOption(OPTION_SOURCE, true, "JAX RS Java input files");
 	}
 
+
 	public static void main(String[] args) throws Exception {
 		CommandLine commandLine = new BasicParser().parse(commandLineOptions, args);
 		if (!commandLine.hasOption(OPTION_SOURCE)) {
@@ -52,8 +54,6 @@ public final class Main {
 
 		JavaProjectBuilder builder = new JavaProjectBuilder();
 		builder.addSourceTree(inputFile);
-		System.out.println(builder.getClassByName("org.jvalue.ods.rest.AbstractApi").getName());
-		for (JavaPackage p : builder.getPackages()) System.out.println(p.getName());
 
 		for (JavaClass javaClass : builder.getClasses()) {
 			JavaFile javaFile = generateClientForClass(javaClass);
@@ -64,8 +64,6 @@ public final class Main {
 
 
 	private static JavaFile generateClientForClass(JavaClass inputClass) {
-		System.out.println("Generating " + inputClass.getName());
-
 		// find path annotation
 		JavaAnnotation path = null;
 		for (JavaAnnotation annotation : inputClass.getAnnotations()) {
@@ -100,7 +98,7 @@ public final class Main {
 				}
 			}
 			if (httpMethod == null) continue;
-			methodBuilder.addAnnotation(createPathAnnotation(httpMethod, path, methodPath));
+			methodBuilder.addAnnotation(createPathAnnotation(inputClass, httpMethod, path, methodPath));
 
 			// parse parameters
 			for (JavaParameter parameter : method.getParameters()) {
@@ -143,14 +141,14 @@ public final class Main {
 	}
 
 
-	private static AnnotationSpec createPathAnnotation(HttpMethod method, JavaAnnotation classPath, JavaAnnotation methodPath) {
+	private static AnnotationSpec createPathAnnotation(JavaClass context, HttpMethod method, JavaAnnotation classPath, JavaAnnotation methodPath) {
 		AnnotationValue pathExpression = classPath.getProperty("value");
 		if (methodPath != null) {
 			pathExpression = new Add(pathExpression, methodPath.getProperty("value"));
 		}
-		// TODO evaluation still failing with unknown ref values
+		EvaluatingVisitor evaluatingVisitor = new SimpleEvaluatingVisitor(context);
 		return AnnotationSpec.builder(method.getRetrofitClass())
-				.addMember("value", "\"" + pathExpression.accept(new SimpleEvaluatingVisitor()).toString() + "\"")
+				.addMember("value", "\"" + pathExpression.accept(evaluatingVisitor).toString() + "\"")
 				.build();
 	}
 
@@ -163,10 +161,40 @@ public final class Main {
 
 	private static class SimpleEvaluatingVisitor extends EvaluatingVisitor {
 
+		private final JavaClass context;
+
+		public SimpleEvaluatingVisitor(JavaClass context) {
+			this.context = context;
+		}
+
 		@Override
 		public Object getFieldReferenceValue(JavaField field) {
-			// TODO
-			return field.getDeclaringClass().getFieldByName(field.getName());
+			String expression = field.getInitializationExpression();
+			if (expression.startsWith("\"")) expression = expression.substring(1);
+			if (expression.endsWith("\"")) expression = expression.substring(0, expression.length() - 1);
+			return expression;
+		}
+
+
+		@Override
+		public Object visit(FieldRef fieldRef) {
+			try {
+				return super.visit(fieldRef);
+			} catch (IllegalArgumentException iae) {
+				// let's try again! (some refs are not found unfortunately ...)
+				JavaPackage currentPackage = context.getPackage();
+				JavaClass targetClass = null;
+				for (JavaClass c : currentPackage.getClasses()) {
+					if (c.getName().equals(fieldRef.getNamePart(0))) {
+						targetClass = c;
+					}
+				}
+
+				if (targetClass == null) throw iae;
+
+				JavaField field = targetClass.getFieldByName(fieldRef.getNamePart(1));
+				return getFieldReferenceValue(field);
+			}
 		}
 
 	}
