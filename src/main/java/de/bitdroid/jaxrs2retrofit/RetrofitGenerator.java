@@ -26,6 +26,7 @@ import javax.ws.rs.Path;
 
 import retrofit.Callback;
 import retrofit.client.Response;
+import retrofit.http.Headers;
 
 public final class RetrofitGenerator {
 
@@ -83,7 +84,7 @@ public final class RetrofitGenerator {
 		for (JavaAnnotation annotation : jaxRsMethod.getAnnotations()) {
 			if (annotation.getType().getFullyQualifiedName().equals(Path.class.getName())) {
 				jaxRsMethodPath = annotation;
-			} else {
+			} else if (httpMethod == null) {
 				httpMethod = HttpMethod.forJaxRsClassName(annotation.getType().getFullyQualifiedName());
 			}
 		}

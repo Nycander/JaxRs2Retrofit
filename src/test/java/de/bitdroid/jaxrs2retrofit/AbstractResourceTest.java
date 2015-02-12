@@ -16,7 +16,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -25,14 +24,14 @@ import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
 import de.bitdroid.jaxrs2retrofit.resources.SimpleResource;
-import mockit.Mocked;
-import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 @RunWith(JMockit.class)
-public final class ResourceTest {
+public abstract class AbstractResourceTest<T> {
 
 	private static final String
 			HOST_ADDRESS = "http://localhost:12345/",
@@ -40,15 +39,17 @@ public final class ResourceTest {
 			RESOURCES_DIR = System.getProperty("user.dir") + "/src/test/java/" + SimpleResource.class.getPackage().getName().replaceAll("\\.", "/"),
 			CLIENT_PACKAGE = "client";
 
-	@Mocked private SimpleResource resource;
-	private Class<SimpleResource> resourceClass = SimpleResource.class;
-
+	private final Class<T> resourceClass;
 	private HttpServer server;
+
+	protected AbstractResourceTest(Class<T> resourceClass) {
+		this.resourceClass = resourceClass;
+	}
 
 
 	@Before
 	public void startServer() throws Exception {
-		ResourceConfig config = new ResourceConfig(resource.getClass());
+		ResourceConfig config = new ResourceConfig(getMockedResource().getClass());
 		server = JdkHttpServerFactory.createHttpServer(new URI(HOST_ADDRESS), config, true);
 	}
 
@@ -80,7 +81,7 @@ public final class ResourceTest {
 		JavaClass resource = builder.getClassByName(resourceClass.getName());
 
 		// generate retrofit client
-		RetrofitGenerator generator = new RetrofitGenerator(RetrofitReturnStrategy.REGULAR, CLIENT_PACKAGE);
+		RetrofitGenerator generator = new RetrofitGenerator(RetrofitReturnStrategy.BOTH, CLIENT_PACKAGE);
 		JavaFile clientSource = generator.createResource(resource);
 
 		// write client to file
@@ -90,7 +91,7 @@ public final class ResourceTest {
 
 		// compile
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-		compiler.run(null, null, null, new File(OUTPUT_DIR).getPath() + "/" + CLIENT_PACKAGE + "/SimpleResource.java");
+		compiler.run(null, null, null, new File(OUTPUT_DIR).getPath() + "/" + CLIENT_PACKAGE + "/" + resourceClass.getSimpleName() + ".java");
 
 		ClassLoader classLoader = new URLClassLoader(new URL[] { new URL("file://" + new File(OUTPUT_DIR).getAbsolutePath() + "/") });
 		Class clientClass = classLoader.loadClass(CLIENT_PACKAGE + "." + resourceClass.getSimpleName());
@@ -101,17 +102,32 @@ public final class ResourceTest {
 				.build();
 
 		Object client = adapter.create(clientClass);
-		for (Method method : clientClass.getDeclaredMethods()) {
-			String[] args = new String[method.getParameterTypes().length];
-			for (int i = 0; i < args.length; ++i) args[i] = "foo";
 
-			if (args.length == 0) method.invoke(client);
-			else method.invoke(client, args);
+		Assert.assertEquals(2 * resourceClass.getDeclaredMethods().length, clientClass.getDeclaredMethods().length);
+		doTestResource(client, clientClass);
+	}
 
-			new Verifications() {{
-				ResourceTest.this.resource.getHelloWorld(); times = 1;
-			}};
+
+	protected Object getArgument(Class<?> paramType) {
+		if (String.class.equals(paramType)) {
+			return "someString";
+		} else if (retrofit.Callback.class.equals(paramType)) {
+			return new retrofit.Callback() {
+				@Override
+				public void success(Object o, Response response) { }
+
+				@Override
+				public void failure(RetrofitError error) {
+					throw error;
+				}
+			};
+		} else {
+			throw new IllegalArgumentException("no value found for type " + paramType.getName());
 		}
 	}
+
+
+	protected abstract void doTestResource(Object client, Class clientClass) throws Exception;
+	protected abstract T getMockedResource();
 
 }
