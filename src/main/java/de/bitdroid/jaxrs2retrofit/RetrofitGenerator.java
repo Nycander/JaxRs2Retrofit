@@ -30,9 +30,11 @@ import retrofit.client.Response;
 public final class RetrofitGenerator {
 
 	private final RetrofitReturnStrategy retrofitReturnStrategy;
+	private final String packageName;
 
-	public RetrofitGenerator(RetrofitReturnStrategy retrofitReturnStrategy) {
+	public RetrofitGenerator(RetrofitReturnStrategy retrofitReturnStrategy, String packageName) {
 		this.retrofitReturnStrategy = retrofitReturnStrategy;
+		this.packageName = packageName;
 	}
 
 
@@ -47,6 +49,7 @@ public final class RetrofitGenerator {
 		}
 		if (jaxRsPath == null) return null; // no a valid JAX RS resource
 
+		System.out.println(jaxRsClass.getName());
 		TypeSpec.Builder retrofitResourceBuilder = TypeSpec
 				.interfaceBuilder(jaxRsClass.getName())
 				.addModifiers(Modifier.PUBLIC);
@@ -60,7 +63,7 @@ public final class RetrofitGenerator {
 			}
 		}
 
-		return JavaFile.builder(jaxRsClass.getPackageName(), retrofitResourceBuilder.build()).build();
+		return JavaFile.builder(packageName, retrofitResourceBuilder.build()).build();
 	}
 
 

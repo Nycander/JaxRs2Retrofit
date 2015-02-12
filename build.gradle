@@ -19,4 +19,8 @@ dependencies {
     compile 'com.squareup:javapoet:1.0.0'
 
     testCompile 'junit:junit:4.11'
+    testCompile 'org.glassfish.jersey:project:2.15'
+    testCompile 'org.glassfish.jersey.containers:jersey-container-jdk-http:2.15'
+    testCompile 'org.jmockit:jmockit:1.14'
+    testCompile 'org.apache.commons:commons-io:1.3.2'
 }
