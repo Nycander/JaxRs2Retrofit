@@ -188,6 +188,10 @@ public final class RetrofitGenerator {
 		} else if (byte.class.getName().equals(jaxRsType.getFullyQualifiedName())) {
 			return TypeName.BYTE;
 
+		// map jaxrs response objects to retrofit ones
+		} else if (javax.ws.rs.core.Response.class.getName().equals(jaxRsType.getFullyQualifiedName())) {
+			return ClassName.get(Response.class);
+
 		} else if (jaxRsType instanceof JavaParameterizedType) {
 			JavaParameterizedType parametrizedType = (JavaParameterizedType) jaxRsType;
 			if (parametrizedType.getActualTypeArguments().size() == 0) {

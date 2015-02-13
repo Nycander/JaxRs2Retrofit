@@ -31,7 +31,6 @@ public final class SimpleResourceTest extends AbstractResourceTest<SimpleResourc
 
 			if (args.length == 0) method.invoke(client);
 			else method.invoke(client, args);
-
 		}
 
 		new Verifications() {{
