@@ -20,6 +20,8 @@ import com.thoughtworks.qdox.model.expression.AnnotationValue;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.lang.model.element.Modifier;
 import javax.ws.rs.Path;
@@ -148,14 +150,29 @@ public final class RetrofitGenerator {
 	}
 
 
+	private final Pattern pathRegexPattern = Pattern.compile("\\{?(\\w+):*[.[^\\{\\}]]*\\}?");
+
 	private AnnotationSpec createPathAnnotation(JavaClass context, HttpMethod method, JavaAnnotation classPath, JavaAnnotation methodPath) {
 		AnnotationValue pathExpression = classPath.getProperty("value");
 		if (methodPath != null) {
 			pathExpression = new Add(pathExpression, methodPath.getProperty("value"));
 		}
 		EvaluatingVisitor evaluatingVisitor = new SimpleEvaluatingVisitor(context);
+		String value =  pathExpression.accept(evaluatingVisitor).toString();
+		Matcher matcher = pathRegexPattern.matcher(value);
+		StringBuilder regexFreeValue = new StringBuilder();
+		while (matcher.find()) {
+			regexFreeValue.append("/");
+			String regexValue = matcher.group(0);
+			if (regexValue.startsWith("{")) regexFreeValue
+					.append("{")
+					.append(matcher.group(1))
+					.append("}");
+			else regexFreeValue.append(matcher.group(1));
+		}
+
 		return AnnotationSpec.builder(method.getRetrofitClass())
-				.addMember("value", "\"" + pathExpression.accept(evaluatingVisitor).toString() + "\"")
+				.addMember("value", "\"" + regexFreeValue.toString() + "\"")
 				.build();
 	}
 
