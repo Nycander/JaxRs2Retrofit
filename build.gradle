@@ -79,8 +79,8 @@ artifacts {
 
 
 bintray {
-    user = bintray_user
-    key = bintray_key
+    user = project.hasProperty("bintray_user") ? bintray_user : "dummy user"
+    key = project.hasProperty("bintray_key") ? bintray_key : "dummy key"
     publications = ['mavenJava']
     dryRun = false
     publish = true
@@ -97,7 +97,7 @@ bintray {
             name = project.version
             gpg {
                 sign = true
-                passphrase = bintray_gpg_passphrase
+                passphrase = project.hasProperty("bintray_gpg_passphrase") ? bintray_gpg_passphrase : "dummy passphrase"
             }
             mavenCentralSync {
                 sync = false //Optional (true by default). Determines whether to sync the version to Maven Central.
