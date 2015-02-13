@@ -81,7 +81,7 @@ public abstract class AbstractResourceTest<T> {
 		JavaClass resource = builder.getClassByName(resourceClass.getName());
 
 		// generate retrofit client
-		RetrofitGenerator generator = new RetrofitGenerator(RetrofitReturnStrategy.BOTH, CLIENT_PACKAGE);
+		RetrofitGenerator generator = new RetrofitGenerator(RetrofitReturnStrategy.BOTH, CLIENT_PACKAGE, "");
 		JavaFile clientSource = generator.createResource(resource);
 
 		// write client to file

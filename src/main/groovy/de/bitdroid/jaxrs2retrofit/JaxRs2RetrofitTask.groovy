@@ -12,10 +12,15 @@ public class JaxRs2RetrofitTask extends DefaultTask {
     @InputDirectory File inputDir
     @OutputDirectory File outputDir = new File("${project.buildDir}/generated/source/jaxrs2retrofit")
     String retrofitPackageName = "client"
+    RetrofitReturnStrategy retrofitReturnStrategy = RetrofitReturnStrategy.BOTH;
+    String excludedClassNamesRegex = ""
 
     @TaskAction
     public void execute(IncrementalTaskInputs inputs) {
-        RetrofitGenerator generator = new RetrofitGenerator(RetrofitReturnStrategy.BOTH, retrofitPackageName);
+        RetrofitGenerator generator = new RetrofitGenerator(
+                retrofitReturnStrategy,
+                retrofitPackageName,
+                excludedClassNamesRegex);
         JavaProjectBuilder builder = new JavaProjectBuilder();
         builder.addSourceTree(inputDir);
         for (JavaClass javaClass : builder.getClasses()) {

@@ -35,13 +35,19 @@ public final class RetrofitGenerator {
 
 	private final RetrofitReturnStrategy retrofitReturnStrategy;
 	private final String packageName;
+	private final String excludedClassNamesRegex;
 	private final Date currentDate;
 	private final SimpleDateFormat dateFormat;
 
 
-	public RetrofitGenerator(RetrofitReturnStrategy retrofitReturnStrategy, String packageName) {
+	public RetrofitGenerator(
+			RetrofitReturnStrategy retrofitReturnStrategy,
+			String packageName,
+			String excludedClassNamesRegex) {
+
 		this.retrofitReturnStrategy = retrofitReturnStrategy;
 		this.packageName = packageName;
+		this.excludedClassNamesRegex = excludedClassNamesRegex;
 		this.currentDate = new Date();
 		this.dateFormat = new SimpleDateFormat("dd.MM.yyyy 'at' HH:mm");
 	}
@@ -57,6 +63,7 @@ public final class RetrofitGenerator {
 			}
 		}
 		if (jaxRsPath == null) return null; // no a valid JAX RS resource
+		if (jaxRsClass.getName().matches(excludedClassNamesRegex)) return null;
 
 		System.out.println(jaxRsClass.getName());
 		TypeSpec.Builder retrofitResourceBuilder = TypeSpec
