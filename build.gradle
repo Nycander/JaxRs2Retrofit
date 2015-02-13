@@ -108,3 +108,16 @@ bintray {
         }
     }
 }
+
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'JaxRs2Retrofit',
+                'Implementation-Version': project.version,
+                'Main-Class': 'de.bitdroid.jaxrs2retrofit.Main'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+    with jar
+}
