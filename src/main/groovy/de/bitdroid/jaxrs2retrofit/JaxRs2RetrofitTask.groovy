@@ -8,9 +8,9 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 
-public class GeneratorTask extends DefaultTask {
+public class JaxRs2RetrofitTask extends DefaultTask {
     @InputDirectory File inputDir
-    @OutputDirectory File outputDir
+    @OutputDirectory File outputDir = new File("${project.buildDir}/generated/source/jaxrs2retrofit")
     String retrofitPackageName = "client"
 
     @TaskAction

@@ -1,13 +1,18 @@
 apply plugin: 'java'
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+
 
 sourceCompatibility = 1.7
 version = '1.0'
 
+
 repositories {
-    mavenCentral()
+    jcenter()
 }
+
 
 dependencies {
     compile gradleApi()
@@ -26,41 +31,80 @@ dependencies {
     testCompile 'org.apache.commons:commons-io:1.3.2'
 }
 
-group = 'de.bitdroid'
-version = '1.0-SNAPSHOT'
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: uri('../repo'))
-        }
-    }
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
 }
 
 
 buildscript {
     repositories {
         jcenter()
-        maven {
-            url uri('../repo')
-        }
     }
     dependencies {
-        classpath group: 'de.bitdroid',
-                name: 'jaxrs2retrofit',
-                version: '1.0-SNAPSHOT'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.0'
     }
 }
 
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.0'
+group = 'de.bitdroid.jaxrs2retrofit'
+version = '0.1.0'
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
 }
 
 
-apply plugin: 'de.bitdroid.jaxrs2retrofit'
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
 
-jaxrs2retrofit {
-    retrofitPackageName = 'someClient'
-    inputDir = new File('input')
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+
+bintray {
+    user = bintray_user
+    key = bintray_key
+    publications = ['mavenJava']
+    dryRun = false
+    publish = true
+    pkg {
+        repo = 'maven'
+        name = 'jaxrs2retrofit'
+        desc = 'Create Retrofit files form JaxRs interfaces.'
+        websiteUrl = 'https://github.com/Maddoc42/JaxRs2Retrofit'
+        issueTrackerUrl = 'https://github.com/Maddoc42/JaxRs2Retrofit/issues'
+        vcsUrl = 'https://github.com/Maddoc42/JaxRs2Retrofit.git'
+        licenses = ['Apache-2.0']
+        publicDownloadNumbers = true
+        version {
+            name = project.version
+            gpg {
+                sign = true
+                passphrase = bintray_gpg_passphrase
+            }
+            mavenCentralSync {
+                sync = false //Optional (true by default). Determines whether to sync the version to Maven Central.
+                user = 'userToken' //OSS user token
+                password = 'password' //OSS user password
+                close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+            }
+        }
+    }
 }
