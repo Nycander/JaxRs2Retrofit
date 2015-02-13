@@ -111,6 +111,31 @@ public abstract class AbstractResourceTest<T> {
 	protected Object getArgument(Class<?> paramType) {
 		if (String.class.equals(paramType)) {
 			return "someString";
+
+		} else if (int.class.equals(paramType)) {
+			return 42;
+
+		} else if (float.class.equals(paramType)) {
+			return 42f;
+
+		} else if (double.class.equals(paramType)) {
+			return 42d;
+
+		} else if (short.class.equals(paramType)) {
+			return (short) 42;
+
+		} else if (long.class.equals(paramType)) {
+			return 42l;
+
+		} else if (char.class.equals(paramType)) {
+			return '*';
+
+		} else if (byte.class.equals(paramType)) {
+			return (byte) 42;
+
+		} else if (boolean.class.equals(paramType)) {
+			return true;
+
 		} else if (retrofit.Callback.class.equals(paramType)) {
 			return new retrofit.Callback() {
 				@Override

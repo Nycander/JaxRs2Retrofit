@@ -17,11 +17,18 @@ public interface SimpleResource {
 	public String getHelloWorld();
 
 	@GET
-	@Path("/{somePath}")
+	@Path("/{path}")
 	public String getHelloWorld(
-			@PathParam("somePath") String somePath,
-			@QueryParam("someQuery") String someQuery,
-			@HeaderParam("someHeader") String someHeader);
+			@PathParam("path") String path,
+			@QueryParam("stringQuery") String stringQuery,
+			@QueryParam("booleanQuery") boolean booleanQuery,
+			@QueryParam("intQuery") int intQuery,
+			@QueryParam("doubleQuery") double doubleQuery,
+			@QueryParam("floatQuery") float floatQuery,
+			@QueryParam("shortQuery") short shortQuery,
+			@QueryParam("longQuery") long longQuery,
+			@QueryParam("byteQuery") byte byteQuery,
+			@HeaderParam("header") String header);
 
 	@POST
 	public String postHello();

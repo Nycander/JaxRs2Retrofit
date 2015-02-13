@@ -26,7 +26,6 @@ import javax.ws.rs.Path;
 
 import retrofit.Callback;
 import retrofit.client.Response;
-import retrofit.http.Headers;
 
 public final class RetrofitGenerator {
 
@@ -162,8 +161,33 @@ public final class RetrofitGenerator {
 
 
 	private TypeName createType(JavaType jaxRsType) {
-		if (jaxRsType.equals(JavaType.VOID)) {
+		if (void.class.getName().equals(jaxRsType.getFullyQualifiedName())) {
 			return TypeName.VOID;
+
+		} else if (boolean.class.getName().equals(jaxRsType.getFullyQualifiedName())) {
+			return TypeName.BOOLEAN;
+
+		} else if (int.class.getName().equals(jaxRsType.getFullyQualifiedName())) {
+			return TypeName.INT;
+
+		} else if (float.class.getName().equals(jaxRsType.getFullyQualifiedName())) {
+			return TypeName.FLOAT;
+
+		} else if (double.class.getName().equals(jaxRsType.getFullyQualifiedName())) {
+			return TypeName.DOUBLE;
+
+		} else if (short.class.getName().equals(jaxRsType.getFullyQualifiedName())) {
+			return TypeName.SHORT;
+
+		} else if (long.class.getName().equals(jaxRsType.getFullyQualifiedName())) {
+			return TypeName.LONG;
+
+		} else if (char.class.getName().equals(jaxRsType.getFullyQualifiedName())) {
+			return TypeName.CHAR;
+
+		} else if (byte.class.getName().equals(jaxRsType.getFullyQualifiedName())) {
+			return TypeName.BYTE;
+
 		} else if (jaxRsType instanceof JavaParameterizedType) {
 			JavaParameterizedType parametrizedType = (JavaParameterizedType) jaxRsType;
 			if (parametrizedType.getActualTypeArguments().size() == 0) {
@@ -176,6 +200,7 @@ public final class RetrofitGenerator {
 				paramTypes[i] = ClassName.bestGuess(parametrizedType.getActualTypeArguments().get(i).getFullyQualifiedName());
 			}
 			return ParameterizedTypeName.get(outerType, paramTypes);
+
 		} else {
 			return ClassName.bestGuess(jaxRsType.getFullyQualifiedName());
 		}

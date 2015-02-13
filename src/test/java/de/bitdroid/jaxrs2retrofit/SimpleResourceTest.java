@@ -36,7 +36,17 @@ public final class SimpleResourceTest extends AbstractResourceTest<SimpleResourc
 
 		new Verifications() {{
 			resource.getHelloWorld(); times = 2;
-			resource.getHelloWorld(anyString, anyString, anyString); times = 2;
+			resource.getHelloWorld(
+					anyString,
+					anyString,
+					anyBoolean,
+					anyInt,
+					anyDouble,
+					anyFloat,
+					anyShort,
+					anyLong,
+					anyByte,
+					anyString ); times = 2;
 		}};
 	}
 
