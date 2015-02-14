@@ -28,7 +28,7 @@ public interface SimpleResource {
 }
 ```
 
-JaxRs2Retrofit will generate the following Retrofit interface
+JaxRs2Retrofit will generate the Retrofit interface below
 
 ```java
 package clientPackage;
@@ -61,7 +61,7 @@ For gradle based builds:
 
 ### Using the gradle plugin
 
-In order to create a new gradle task that will generate the Retrofit interfaces reference JaxRs2Retrofit
+In order to create a new gradle task that will generate Retrofit interfaces you must first include JaxRs2Retrofit
 in the buildscript section
 
 ```
@@ -89,9 +89,9 @@ project.compileJava.source += jaxrs2retrofit.outputs.files
 ```
 
 Notes about settings:
-- `inputDir`: location of the JAX RS sources, e.g. `new File(project.projectDir.toString() + "/src/main/java"`
+- `inputDir`: location of the JAX RS sources, e.g. `new File(project.projectDir.toString() + "/src/main/java")`
 - `outputDir`: where the generated `.java` files should be stored
-- `retrofitPackagename`: package nanme of generated files
+- `retrofitPackagename`: package name of generated files
 - `excludedClassNamesRegex`: Java regex to exclude JAX RS files form generating Retrofit interfaces. Optional
 
 ### Using the standalone jar
@@ -113,6 +113,6 @@ Limitations
 
 - Resolving annotation values (e.g. `@Path(MyConstants.SOME_PATH)`) is very limited and works only with simple references
 - `@Consume` and `@Produce` have no effect (include those in a `@Headers` section for each Retrofit method?)
-- `@Context` are included in method parameter list
-- Path regex are ignored in Retrofit paths, e.g. `@Path("/{path}{regex:(/.*)?}")` 
+- `@Context` annotated parameters are included in the Retrofit method parameter list
+- JAX-RS path regex are ignored in Retrofit paths, e.g. `@Path("/{path}{regex:(/.*)?}")` 
   is translated to `@GET("/{path}/{regex}")`
