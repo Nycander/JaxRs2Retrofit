@@ -6,19 +6,19 @@ import org.junit.runner.RunWith;
 
 import java.lang.reflect.Method;
 
-import de.bitdroid.jaxrs2retrofit.resources.AdvancedResource;
+import de.bitdroid.jaxrs2retrofit.resources.PathRegexResource;
 import mockit.Mocked;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 
 
 @RunWith(JMockit.class)
-public final class AdvancedResourceTest extends AbstractResourceTest<AdvancedResource> {
+public final class PathRegexResourceTest extends AbstractResourceTest<PathRegexResource> {
 
-	@Mocked private AdvancedResource resource;
+	@Mocked private PathRegexResource resource;
 
-	public AdvancedResourceTest() {
-		super(AdvancedResource.class);
+	public PathRegexResourceTest() {
+		super(PathRegexResource.class);
 	}
 
 
@@ -34,7 +34,7 @@ public final class AdvancedResourceTest extends AbstractResourceTest<AdvancedRes
 
 
 	@Override
-	protected AdvancedResource getMockedResource() {
+	protected PathRegexResource getMockedResource() {
 		return resource;
 	}
 

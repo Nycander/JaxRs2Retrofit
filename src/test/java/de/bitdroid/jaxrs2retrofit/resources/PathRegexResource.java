@@ -7,7 +7,7 @@ import javax.ws.rs.PathParam;
 
 
 @Path("/path")
-public interface AdvancedResource {
+public interface PathRegexResource {
 
 	@GET
 	@Path("/{path}{regex:(/.*)?}")
