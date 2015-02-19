@@ -1,6 +1,7 @@
 package de.bitdroid.jaxrs2retrofit;
 
 
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.lang.reflect.InvocationTargetException;
@@ -23,15 +24,9 @@ public final class AdvancedResourceTest extends AbstractResourceTest<AdvancedRes
 	}
 
 
-	@Override
-	protected void doTestResource(Object client, Class clientClass) throws Exception {
-		testResponseMapping(client, clientClass);
-		testRegexElimination(client, clientClass);
-	}
-
-
+	@Test
 	@SuppressWarnings("unchecked")
-	private void testResponseMapping(Object client, Class clientClass) throws Exception {
+	public void testResponseMapping() throws Exception {
 		Method getResourceMethod = clientClass.getDeclaredMethod("getResponse");
 		try {
 			getResourceMethod.invoke(client);
@@ -48,8 +43,9 @@ public final class AdvancedResourceTest extends AbstractResourceTest<AdvancedRes
 	}
 
 
+	@Test
 	@SuppressWarnings("unchecked")
-	private void testRegexElimination(Object client, Class clientClass) throws Exception {
+	public void testRegexElimination() throws Exception {
 		Method regexMethod = clientClass.getDeclaredMethod("getRegex", String.class, String.class);
 		regexMethod.invoke(client, "somePath", "someOtherPath");
 		new Verifications() {{

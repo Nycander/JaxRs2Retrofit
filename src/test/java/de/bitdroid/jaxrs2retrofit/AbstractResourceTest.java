@@ -12,7 +12,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
@@ -26,8 +25,6 @@ import javax.tools.ToolProvider;
 import de.bitdroid.jaxrs2retrofit.resources.SimpleResource;
 import mockit.integration.junit4.JMockit;
 import retrofit.RestAdapter;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 
 @RunWith(JMockit.class)
@@ -42,6 +39,9 @@ public abstract class AbstractResourceTest<T> {
 	private final Class<T> resourceClass;
 	private HttpServer server;
 
+	protected Object client;
+	protected Class clientClass;
+
 	protected AbstractResourceTest(Class<T> resourceClass) {
 		this.resourceClass = resourceClass;
 	}
@@ -55,25 +55,7 @@ public abstract class AbstractResourceTest<T> {
 
 
 	@Before
-	public void setupOutputDir() {
-		Assert.assertTrue(new File(OUTPUT_DIR).mkdir());
-	}
-
-
-	@After
-	public void stopServer() {
-		server.stop(0);
-	}
-
-
-	@After
-	public void removeOutputDir() throws Exception {
-		FileUtils.deleteDirectory(new File(OUTPUT_DIR));
-	}
-
-
-	@Test
-	public void testResource() throws Exception {
+	public void createClientClassAndObject() throws Exception {
 		// read resource Java files
 		JavaProjectBuilder builder = new JavaProjectBuilder();
 		File resourceDir = new File(RESOURCES_DIR);
@@ -86,6 +68,7 @@ public abstract class AbstractResourceTest<T> {
 
 		// write client to file
 		File clientFile = new File(OUTPUT_DIR);
+		Assert.assertTrue(clientFile.mkdir());
 		clientSource.writeTo(clientFile);
 		clientSource.writeTo(System.out);
 
@@ -94,65 +77,33 @@ public abstract class AbstractResourceTest<T> {
 		compiler.run(null, null, null, new File(OUTPUT_DIR).getPath() + "/" + CLIENT_PACKAGE + "/" + resourceClass.getSimpleName() + ".java");
 
 		ClassLoader classLoader = new URLClassLoader(new URL[] { new URL("file://" + new File(OUTPUT_DIR).getAbsolutePath() + "/") });
-		Class clientClass = classLoader.loadClass(CLIENT_PACKAGE + "." + resourceClass.getSimpleName());
+		this.clientClass = classLoader.loadClass(CLIENT_PACKAGE + "." + resourceClass.getSimpleName());
 
 		// setup retrofit client
-		RestAdapter adapter = new RestAdapter.Builder()
-				.setEndpoint(HOST_ADDRESS)
-				.build();
+		RestAdapter adapter = getRestAdapterBuilder().build();
 
-		Object client = adapter.create(clientClass);
-
+		this.client = adapter.create(clientClass);
 		Assert.assertEquals(2 * resourceClass.getDeclaredMethods().length, clientClass.getDeclaredMethods().length);
-		doTestResource(client, clientClass);
 	}
 
 
-	protected Object getArgument(Class<?> paramType) {
-		if (String.class.equals(paramType)) {
-			return "someString";
-
-		} else if (int.class.equals(paramType)) {
-			return 42;
-
-		} else if (float.class.equals(paramType)) {
-			return 42f;
-
-		} else if (double.class.equals(paramType)) {
-			return 42d;
-
-		} else if (short.class.equals(paramType)) {
-			return (short) 42;
-
-		} else if (long.class.equals(paramType)) {
-			return 42l;
-
-		} else if (char.class.equals(paramType)) {
-			return '*';
-
-		} else if (byte.class.equals(paramType)) {
-			return (byte) 42;
-
-		} else if (boolean.class.equals(paramType)) {
-			return true;
-
-		} else if (retrofit.Callback.class.equals(paramType)) {
-			return new retrofit.Callback() {
-				@Override
-				public void success(Object o, Response response) { }
-
-				@Override
-				public void failure(RetrofitError error) {
-					throw error;
-				}
-			};
-		} else {
-			throw new IllegalArgumentException("no value found for type " + paramType.getName());
-		}
+	@After
+	public void stopServer() {
+		server.stop(0);
 	}
 
 
-	protected abstract void doTestResource(Object client, Class clientClass) throws Exception;
+	@After
+	public void removeGeneratedFiles() throws Exception {
+		FileUtils.deleteDirectory(new File(OUTPUT_DIR));
+	}
+
+
 	protected abstract T getMockedResource();
+
+
+	protected RestAdapter.Builder getRestAdapterBuilder() {
+		return new RestAdapter.Builder().setEndpoint(HOST_ADDRESS);
+	}
 
 }
