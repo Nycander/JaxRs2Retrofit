@@ -176,7 +176,8 @@ public final class RetrofitGenerator {
 	}
 
 
-	private final Pattern pathRegexPattern = Pattern.compile("\\{?(\\w+):*[.[^\\{\\}]]*\\}?");
+	private final Pattern pathRegexPattern = Pattern.compile("\\{?(\\w+)(:[^\\{\\}]*)?\\}?");
+
 
 	private AnnotationSpec createPathAnnotation(JavaClass context, HttpMethod method, JavaAnnotation classPath, JavaAnnotation methodPath) {
 		AnnotationValue pathExpression = classPath.getProperty("value");

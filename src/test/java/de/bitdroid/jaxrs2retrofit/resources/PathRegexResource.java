@@ -13,4 +13,8 @@ public interface PathRegexResource {
 	@Path("/{path}{regex:(/.*)?}")
 	public String getRegex(@PathParam("path") String path, @PathParam("regex") String regex);
 
+	@GET
+	@Path("/path2")
+	public String getRegular();
+
 }

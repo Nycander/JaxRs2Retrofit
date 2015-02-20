@@ -27,8 +27,11 @@ public final class PathRegexResourceTest extends AbstractResourceTest<PathRegexR
 	public void testRegexElimination() throws Exception {
 		Method regexMethod = clientClass.getDeclaredMethod("getRegex", String.class, String.class);
 		regexMethod.invoke(client, "somePath", "someOtherPath");
+		clientClass.getDeclaredMethod("getRegular").invoke(client);
+
 		new Verifications() {{
 			resource.getRegex(anyString, anyString); times = 1;
+			resource.getRegular(); times = 1;
 		}};
 	}
 
