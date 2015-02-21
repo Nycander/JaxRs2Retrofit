@@ -26,10 +26,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.lang.model.element.Modifier;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
 
 import retrofit.Callback;
 import retrofit.client.Response;
+import retrofit.http.Headers;
 
 public final class RetrofitGenerator {
 
@@ -38,6 +41,7 @@ public final class RetrofitGenerator {
 	private final String excludedClassNamesRegex;
 	private final Date currentDate;
 	private final SimpleDateFormat dateFormat;
+
 
 
 	public RetrofitGenerator(
@@ -56,10 +60,13 @@ public final class RetrofitGenerator {
 	public JavaFile createResource(JavaClass jaxRsClass) {
 		// find path annotation
 		JavaAnnotation jaxRsPath = null;
+		JavaAnnotation jaxRsConsumes = null;
 		for (JavaAnnotation annotation : jaxRsClass.getAnnotations()) {
-			if (annotation.getType().getFullyQualifiedName().equals(Path.class.getName())) {
+			String annotationType = annotation.getType().getFullyQualifiedName();
+			if (annotationType.equals(Path.class.getName())) {
 				jaxRsPath = annotation;
-				break;
+			} else if (annotationType.equals(Consumes.class.getName())) {
+				jaxRsConsumes = annotation;
 			}
 		}
 		if (jaxRsPath == null) return null; // no a valid JAX RS resource
@@ -72,7 +79,7 @@ public final class RetrofitGenerator {
 		addAboutJavadoc(retrofitResourceBuilder);
 
 		for (JavaMethod jaxRsMethod : jaxRsClass.getMethods()) {
-			List<MethodSpec> retrofitMethods = createMethod(jaxRsClass, jaxRsMethod, jaxRsPath);
+			List<MethodSpec> retrofitMethods = createMethod(jaxRsClass, jaxRsMethod, jaxRsPath, jaxRsConsumes);
 			if (retrofitMethods != null) {
 				for (MethodSpec method : retrofitMethods) {
 					retrofitResourceBuilder.addMethod(method);
@@ -98,7 +105,8 @@ public final class RetrofitGenerator {
 	private List<MethodSpec> createMethod(
 			JavaClass jaxRsClass,
 			JavaMethod jaxRsMethod,
-			JavaAnnotation jaxRsPath) {
+			JavaAnnotation jaxRsPath,
+			JavaAnnotation jaxRsConsumes) {
 
 		List<MethodSpec> retrofitMethods = new LinkedList<>();
 		MethodSpec.Builder retrofitMethodBuilder = MethodSpec
@@ -109,15 +117,27 @@ public final class RetrofitGenerator {
 		JavaAnnotation jaxRsMethodPath = null;
 		HttpMethod httpMethod = null;
 		for (JavaAnnotation annotation : jaxRsMethod.getAnnotations()) {
-			if (annotation.getType().getFullyQualifiedName().equals(Path.class.getName())) {
+			String annotationType = annotation.getType().getFullyQualifiedName();
+			if (annotationType.equals(Path.class.getName())) {
 				jaxRsMethodPath = annotation;
+			} else if (annotationType.equals(Consumes.class.getName())) {
+				jaxRsConsumes = annotation;
 			} else if (httpMethod == null) {
 				httpMethod = HttpMethod.forJaxRsClassName(annotation.getType().getFullyQualifiedName());
 			}
 		}
 		if (httpMethod == null) return null; // not a valid resource method
+		EvaluatingVisitor evaluatingVisitor = new SimpleEvaluatingVisitor(jaxRsClass);
+
+		// add path
 		retrofitMethodBuilder
-				.addAnnotation(createPathAnnotation(jaxRsClass, httpMethod, jaxRsPath, jaxRsMethodPath));
+				.addAnnotation(createPathAnnotation(evaluatingVisitor, httpMethod, jaxRsPath, jaxRsMethodPath));
+
+		// add content type
+		if (jaxRsConsumes != null) {
+			retrofitMethodBuilder
+					.addAnnotation(createContentTypeAnnotation(evaluatingVisitor, jaxRsConsumes));
+		}
 
 		// create parameters
 		for (JavaParameter jaxRsParameter : jaxRsMethod.getParameters()) {
@@ -179,12 +199,16 @@ public final class RetrofitGenerator {
 	private final Pattern pathRegexPattern = Pattern.compile("\\{?(\\w+)(:[^\\{\\}]*)?\\}?");
 
 
-	private AnnotationSpec createPathAnnotation(JavaClass context, HttpMethod method, JavaAnnotation classPath, JavaAnnotation methodPath) {
+	private AnnotationSpec createPathAnnotation(
+			EvaluatingVisitor evaluatingVisitor,
+			HttpMethod method,
+			JavaAnnotation classPath,
+			JavaAnnotation methodPath) {
+
 		AnnotationValue pathExpression = classPath.getProperty("value");
 		if (methodPath != null) {
 			pathExpression = new Add(pathExpression, methodPath.getProperty("value"));
 		}
-		EvaluatingVisitor evaluatingVisitor = new SimpleEvaluatingVisitor(context);
 		String value =  pathExpression.accept(evaluatingVisitor).toString();
 		Matcher matcher = pathRegexPattern.matcher(value);
 		StringBuilder regexFreeValue = new StringBuilder();
@@ -200,6 +224,31 @@ public final class RetrofitGenerator {
 
 		return AnnotationSpec.builder(method.getRetrofitClass())
 				.addMember("value", "\"" + regexFreeValue.toString() + "\"")
+				.build();
+	}
+
+
+	private AnnotationSpec createContentTypeAnnotation(
+			EvaluatingVisitor evaluatingVisitor,
+			JavaAnnotation consumesAnnotation) {
+
+		AnnotationValue annotationValue = consumesAnnotation.getProperty("value");
+		String stringAnnotationValue = annotationValue.getParameterValue().toString();
+
+		String value = null;
+		if (stringAnnotationValue.startsWith(MediaType.class.getSimpleName() + ".")) {
+			String[] token = stringAnnotationValue.split("\\.");
+			try {
+				value = (String) MediaType.class.getDeclaredField(token[1]).get(null);
+			} catch (Exception e) {
+				e.printStackTrace(System.err);
+			}
+		} else {
+			value = consumesAnnotation.getProperty("value").accept(evaluatingVisitor).toString();
+		}
+
+		return AnnotationSpec.builder(Headers.class)
+				.addMember("value", "\"Content-type: " + value + "\"")
 				.build();
 	}
 
