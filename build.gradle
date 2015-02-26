@@ -48,7 +48,7 @@ buildscript {
 
 
 group = 'de.bitdroid.jaxrs2retrofit'
-version = '0.1.0'
+version = '0.1.1'
 
 
 publishing {
@@ -95,6 +95,7 @@ bintray {
         publicDownloadNumbers = true
         version {
             name = project.version
+            desc = 'Added support for content type headers'
             gpg {
                 sign = true
                 passphrase = project.hasProperty("bintray_gpg_passphrase") ? bintray_gpg_passphrase : "dummy passphrase"
