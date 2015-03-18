@@ -1,6 +1,7 @@
 # Generated files
 *.class
 build
+target
 
 # Package files
 *.jar

@@ -9,7 +9,7 @@ import javax.ws.rs.core.MediaType;
 
 @Path("/path")
 @Consumes(MediaType.APPLICATION_JSON)
-public interface CustomAnnotationResource extends SimpleResource {
+public interface CustomAnnotationResource {
 
 	@GET
 	@Path("/value1")

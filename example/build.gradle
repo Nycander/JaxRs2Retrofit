@@ -1,0 +1,49 @@
+import com.squareup.javapoet.ClassName
+import de.bitdroid.jaxrs2retrofit.JaxRs2RetrofitTask
+import de.bitdroid.jaxrs2retrofit.converter.AnnotatedParam
+import de.bitdroid.jaxrs2retrofit.converter.ParamConverter
+
+import javax.ws.rs.QueryParam
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+buildscript {
+    repositories {
+        jcenter()
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'de.bitdroid.jaxrs2retrofit:plugin:0.1.2'
+    }
+}
+
+task jaxrs2retrofit(type: JaxRs2RetrofitTask) {
+    inputDir = new File(project.projectDir.toString() + "/src/main/java")
+    outputDir = new File(project.projectDir.toString() + "/target/generated-sources/jaxrs2retrofit/")
+    retrofitPackageName = "de.bitdroid.jaxrs2retrofit.generated"
+    excludedClassNamesRegex = "MyHiddenResource"
+    paramConverterManager.registerConverter(ClassName.get(QueryParam.class), new ParamConverter() {
+        @Override
+        AnnotatedParam convert(AnnotatedParam param) {
+            return new AnnotatedParam(
+                    ClassName.get(String.class),
+                    param.getAnnotationType(),
+                    param.getAnnotationParameterMap());
+        }
+    });
+}
+project.compileJava.dependsOn jaxrs2retrofit
+project.compileJava.source += jaxrs2retrofit.outputs.files
+
+idea {
+    module {
+        sourceDirs += new File(project.projectDir.toString() + "/target/generated-sources/jaxrs2retrofit/")
+    }
+}
+
+dependencies {
+    compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
+    compile 'com.squareup.retrofit:retrofit:1.9.0'
+    compile 'com.squareup:javapoet:1.0.0'
+}
