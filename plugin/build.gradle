@@ -1,0 +1,114 @@
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+
+
+sourceCompatibility = 1.7
+version = '1.0'
+
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+
+    compile 'commons-cli:commons-cli:1.2'
+    compile 'com.thoughtworks.qdox:qdox:2.0-M3'
+    compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
+    compile 'com.squareup.retrofit:retrofit:1.9.0'
+    compile 'com.squareup:javapoet:1.0.0'
+
+    testCompile 'junit:junit:4.11'
+    testCompile 'org.glassfish.jersey:project:2.15'
+    testCompile 'org.glassfish.jersey.containers:jersey-container-jdk-http:2.15'
+    testCompile 'org.jmockit:jmockit:1.14'
+    testCompile 'org.apache.commons:commons-io:1.3.2'
+}
+
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.0'
+    }
+}
+
+
+group = 'de.bitdroid.jaxrs2retrofit'
+version = '0.1.1'
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}
+
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+
+bintray {
+    user = project.hasProperty("bintray_user") ? bintray_user : "dummy user"
+    key = project.hasProperty("bintray_key") ? bintray_key : "dummy key"
+    publications = ['mavenJava']
+    dryRun = false
+    publish = true
+    pkg {
+        repo = 'maven'
+        name = 'jaxrs2retrofit'
+        desc = 'Create Retrofit files form JaxRs interfaces.'
+        websiteUrl = 'https://github.com/Maddoc42/JaxRs2Retrofit'
+        issueTrackerUrl = 'https://github.com/Maddoc42/JaxRs2Retrofit/issues'
+        vcsUrl = 'https://github.com/Maddoc42/JaxRs2Retrofit.git'
+        licenses = ['Apache-2.0']
+        publicDownloadNumbers = true
+        version {
+            name = project.version
+            desc = 'Added support for content type headers'
+            gpg {
+                sign = true
+                passphrase = project.hasProperty("bintray_gpg_passphrase") ? bintray_gpg_passphrase : "dummy passphrase"
+            }
+            mavenCentralSync {
+                sync = false //Optional (true by default). Determines whether to sync the version to Maven Central.
+                user = 'userToken' //OSS user token
+                password = 'password' //OSS user password
+                close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+            }
+        }
+    }
+}
+
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'JaxRs2Retrofit',
+                'Implementation-Version': project.version,
+                'Main-Class': 'de.bitdroid.jaxrs2retrofit.Main'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+    with jar
+}

@@ -1,1 +1,2 @@
-rootProject.name = 'jaxrs2retrofit'
+include ':plugin', ':example'
+
