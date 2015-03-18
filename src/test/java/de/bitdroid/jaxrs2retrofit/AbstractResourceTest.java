@@ -22,6 +22,7 @@ import java.net.URLClassLoader;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
+import de.bitdroid.jaxrs2retrofit.converter.ParamConverterManager;
 import de.bitdroid.jaxrs2retrofit.resources.SimpleResource;
 import mockit.integration.junit4.JMockit;
 import retrofit.RestAdapter;
@@ -49,7 +50,7 @@ public abstract class AbstractResourceTest<T> {
 
 	@Before
 	public void startServer() throws Exception {
-		ResourceConfig config = new ResourceConfig(getMockedResource().getClass());
+		ResourceConfig config = getResourceConfig();
 		server = JdkHttpServerFactory.createHttpServer(new URI(HOST_ADDRESS), config, true);
 	}
 
@@ -63,7 +64,7 @@ public abstract class AbstractResourceTest<T> {
 		JavaClass resource = builder.getClassByName(resourceClass.getName());
 
 		// generate retrofit client
-		RetrofitGenerator generator = new RetrofitGenerator(RetrofitReturnStrategy.BOTH, CLIENT_PACKAGE, "");
+		RetrofitGenerator generator = new RetrofitGenerator(RetrofitReturnStrategy.BOTH, CLIENT_PACKAGE, "", getParamConverterManager());
 		JavaFile clientSource = generator.createResource(resource);
 
 		// write client to file
@@ -104,6 +105,16 @@ public abstract class AbstractResourceTest<T> {
 
 	protected RestAdapter.Builder getRestAdapterBuilder() {
 		return new RestAdapter.Builder().setEndpoint(HOST_ADDRESS);
+	}
+
+
+	protected ResourceConfig getResourceConfig() {
+		return new ResourceConfig(getMockedResource().getClass());
+	}
+
+
+	protected ParamConverterManager getParamConverterManager() {
+		return ParamConverterManager.getDefaultInstance();
 	}
 
 }

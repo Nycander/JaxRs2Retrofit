@@ -12,6 +12,8 @@ import org.apache.commons.cli.Options;
 
 import java.io.File;
 
+import de.bitdroid.jaxrs2retrofit.converter.ParamConverterManager;
+
 public final class Main {
 
 	private static final Options commandLineOptions = new Options();
@@ -41,7 +43,12 @@ public final class Main {
 		String excludedClassNamesRegex = "";
 		if (commandLine.hasOption(OPTION_EXCLUDED_CLASSES)) excludedClassNamesRegex = commandLine.getOptionValue(OPTION_EXCLUDED_CLASSES);
 
-		RetrofitGenerator generator = new RetrofitGenerator(RetrofitReturnStrategy.BOTH, "client", excludedClassNamesRegex);
+		RetrofitGenerator generator = new RetrofitGenerator(
+				RetrofitReturnStrategy.BOTH,
+				"client",
+				excludedClassNamesRegex,
+				ParamConverterManager.getDefaultInstance());
+
 		JavaProjectBuilder builder = new JavaProjectBuilder();
 		builder.addSourceTree(inputFile);
 

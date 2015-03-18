@@ -20,8 +20,10 @@ import com.thoughtworks.qdox.model.expression.AnnotationValue;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +32,9 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 
+import de.bitdroid.jaxrs2retrofit.converter.AnnotatedParam;
+import de.bitdroid.jaxrs2retrofit.converter.ParamConverter;
+import de.bitdroid.jaxrs2retrofit.converter.ParamConverterManager;
 import retrofit.Callback;
 import retrofit.client.Response;
 import retrofit.http.Headers;
@@ -41,19 +46,21 @@ public final class RetrofitGenerator {
 	private final String excludedClassNamesRegex;
 	private final Date currentDate;
 	private final SimpleDateFormat dateFormat;
-
+	private final ParamConverterManager paramConverterManager;
 
 
 	public RetrofitGenerator(
 			RetrofitReturnStrategy retrofitReturnStrategy,
 			String packageName,
-			String excludedClassNamesRegex) {
+			String excludedClassNamesRegex,
+			ParamConverterManager paramConverterManager) {
 
 		this.retrofitReturnStrategy = retrofitReturnStrategy;
 		this.packageName = packageName;
 		this.excludedClassNamesRegex = excludedClassNamesRegex;
 		this.currentDate = new Date();
 		this.dateFormat = new SimpleDateFormat("dd.MM.yyyy 'at' HH:mm");
+		this.paramConverterManager = paramConverterManager;
 	}
 
 
@@ -141,7 +148,8 @@ public final class RetrofitGenerator {
 
 		// create parameters
 		for (JavaParameter jaxRsParameter : jaxRsMethod.getParameters()) {
-			retrofitMethodBuilder.addParameter(createParameter(jaxRsParameter));
+			ParameterSpec spec = createParameter(jaxRsParameter);
+			if (spec != null) retrofitMethodBuilder.addParameter(spec);
 		}
 
 		// create return type
@@ -169,27 +177,41 @@ public final class RetrofitGenerator {
 	private ParameterSpec createParameter(
 			JavaParameter jaxRsParameter) {
 
+		// find first annotation which can be converted, others are ignored
 		JavaAnnotation jaxRsAnnotation = null;
-		ParameterType parameterType = null;
+		ClassName annotationType = ClassName.get(Void.class);
+		TypeName paramType = createType(jaxRsParameter.getJavaClass());
 
 		for (JavaAnnotation annotation : jaxRsParameter.getAnnotations()) {
-			parameterType = ParameterType.forJaxRsClassName(annotation.getType().getFullyQualifiedName());
-			if (parameterType != null) {
-				jaxRsAnnotation = annotation;
-				break;
-			}
+			annotationType = (ClassName) createType(annotation.getType());
+			jaxRsAnnotation = annotation;
+			if (paramConverterManager.hasConverter(annotationType)) break;
 		}
-		if (parameterType == null) parameterType = ParameterType.BODY; // if none found assume that it belongs into the body
 
-		TypeName retrofitParamClassName = createType(jaxRsParameter.getJavaClass());
+
+		// convert annotation and param
+		AnnotatedParam param = new AnnotatedParam(
+				paramType,
+				annotationType,
+				(jaxRsAnnotation == null) ? new HashMap<String, Object>() : jaxRsAnnotation.getNamedParameterMap());
+
+		ParamConverter converter = paramConverterManager.getConverter(annotationType);
+		// if no converted is found, ignore by default
+		if (converter == null) return null;
+		AnnotatedParam convertedParam = converter.convert(param);
+		if (convertedParam == null) return null;
+
+		// create code
 		ParameterSpec.Builder retrofitParamBuilder = ParameterSpec
-				.builder(retrofitParamClassName, jaxRsParameter.getName());
+				.builder(convertedParam.getParamType(), jaxRsParameter.getName());
 
 		AnnotationSpec.Builder retrofitParamAnnotationBuilder = AnnotationSpec
-				.builder(parameterType.getRetrofitClass());
+				.builder(convertedParam.getAnnotationType());
 
 		if (jaxRsAnnotation != null) {
-			retrofitParamAnnotationBuilder.addMember("value", jaxRsAnnotation.getNamedParameter("value").toString());
+			for (Map.Entry<String, Object> entry : convertedParam.getAnnotationParameterMap().entrySet()) {
+				retrofitParamAnnotationBuilder.addMember(entry.getKey(), entry.getValue().toString());
+			}
 		}
 		retrofitParamBuilder.addAnnotation(retrofitParamAnnotationBuilder.build());
 		return retrofitParamBuilder.build();
