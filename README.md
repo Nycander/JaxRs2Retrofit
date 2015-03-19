@@ -102,7 +102,7 @@ task jaxrs2retrofit(type: de.bitdroid.jaxrs2retrofit.JaxRs2RetrofitTask) {
 
 ## Processing custom annotations
 
-By default JaxRs2Retrofit will drop all parameters from method signatures that have an unknown annotation attached to it, like `@Auth User user`. This behaviour can be customized registering a custom [`ParamConverter`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/ParamConverter.java), for example in the build script:
+By default JaxRs2Retrofit will drop all parameter annotations that it does not know how to deal with, like `@Auth User user`. This behaviour can be customized registering a custom [`ParamConverter`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/ParamConverter.java), for example in the build script:
 
 ```groovy
 task jaxrs2retrofit(type: de.bitdroid.jaxrs2retrofit.JaxRs2RetrofitTask) {
@@ -118,7 +118,7 @@ task jaxrs2retrofit(type: de.bitdroid.jaxrs2retrofit.JaxRs2RetrofitTask) {
     });
 ```
 
-The example will convert all parameters annotated with `@QueryParam("<value">)` to `@Query("<value">) String`.
+This will convert all parameters annotated with `@QueryParam("<value">)` to `@Query("<value">) String`.
 
 To create your own converter you will need to supply a [`ParamConverter`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/ParamConverter.java) which processes [`AnnotatedParam`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/AnnotatedParam.java) instances and map it to a [`ClassName`](https://square.github.io/javapoet/javadoc/javapoet/com/squareup/javapoet/ClassName.html).
 
