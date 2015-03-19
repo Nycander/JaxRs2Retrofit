@@ -56,6 +56,7 @@ public abstract class AbstractResourceTest<T> {
 
 
 	@Before
+	@SuppressWarnings("unchecked")
 	public void createClientClassAndObject() throws Exception {
 		// read resource Java files
 		JavaProjectBuilder builder = new JavaProjectBuilder();
