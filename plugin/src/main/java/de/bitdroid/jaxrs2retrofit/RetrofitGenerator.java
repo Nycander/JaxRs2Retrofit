@@ -179,7 +179,7 @@ public final class RetrofitGenerator {
 
 		// find first annotation which can be converted, others are ignored
 		JavaAnnotation jaxRsAnnotation = null;
-		ClassName annotationType = ClassName.get(Void.class);
+		ClassName annotationType = null;
 		TypeName paramType = createType(jaxRsParameter.getJavaClass());
 
 		for (JavaAnnotation annotation : jaxRsParameter.getAnnotations()) {
@@ -188,6 +188,18 @@ public final class RetrofitGenerator {
 			if (paramConverterManager.hasConverter(annotationType)) break;
 		}
 
+		// find suitable converter
+		ParamConverter converter = paramConverterManager.getConverter(annotationType);
+
+		// if no converter was found, ignore annotation
+		if (converter == null) {
+			annotationType = ClassName.get(Void.class);
+			converter = paramConverterManager.getConverter(annotationType);
+		}
+
+		// if still no converted is found, ignore parameter completely (should (TM) only happen when
+		// void converter has been explicitly removed
+		if (converter == null) return null;
 
 		// convert annotation and param
 		AnnotatedParam param = new AnnotatedParam(
@@ -195,9 +207,6 @@ public final class RetrofitGenerator {
 				annotationType,
 				(jaxRsAnnotation == null) ? new HashMap<String, Object>() : jaxRsAnnotation.getNamedParameterMap());
 
-		ParamConverter converter = paramConverterManager.getConverter(annotationType);
-		// if no converted is found, ignore by default
-		if (converter == null) return null;
 		AnnotatedParam convertedParam = converter.convert(param);
 		if (convertedParam == null) return null;
 

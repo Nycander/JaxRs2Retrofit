@@ -54,7 +54,7 @@ public final class CustomAnnotationTest extends AbstractResourceTest<CustomAnnot
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testDropParam() throws Exception {
-		clientClass.getDeclaredMethod("dropAnnotation");
+		clientClass.getDeclaredMethod("dropParameter");
 	}
 
 
@@ -67,6 +67,13 @@ public final class CustomAnnotationTest extends AbstractResourceTest<CustomAnnot
 		Assert.assertEquals(1, annotations.length);
 		Assert.assertEquals(1, annotations[0].length);
 		Assert.assertEquals(Header.class, annotations[0][0].annotationType());
+	}
+
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testDropAnnotation() throws Exception {
+		clientClass.getDeclaredMethod("dropAnnotation", String.class);
 	}
 
 
