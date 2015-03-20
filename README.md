@@ -59,12 +59,14 @@ For gradle based builds:
 
 ## Using the gradle plugin
 
-In order to create a new gradle task that will generate Retrofit interfaces you must first include JaxRs2Retrofit
-in the buildscript section
+... can be as simple as applying the plugin
 
 ```groovy
+apply plugin: 'de.bitdroid.jaxrs2retrofit'
+
 buildscript {
     repositories {
+        mavenLocal()
         jcenter()
     }
     dependencies {
@@ -73,28 +75,26 @@ buildscript {
 }
 ```
 
-and create a new task
+which creates a new gradle task called `jaxRs2Retrofit` that will generate the client interfaces. Optionally a number of configurations can be supplied
 
 ```groovy
-task jaxrs2retrofit(type: de.bitdroid.jaxrs2retrofit.JaxRs2RetrofitTask) {
-    inputDir = new File("</my/awesome/resources>")
-    outputDir = new File(project.projectDir.toString() + "/target/generated-sources/jaxrs2retrofit/")
-    retrofitPackageName = "<my/awesome/package"
+jaxRs2Retrofit {
+    inputDir = file('src/main/java')
+    outputDir = file('target/generated-sources/jaxrs2retrofit')
+    packageName = 'de.bitdroid.jaxrs2retrofit'
 }
-project.compileJava.dependsOn jaxrs2retrofit
-project.compileJava.source += jaxrs2retrofit.outputs.files
 ```
 
-- `inputDir`: location of the JAX RS sources, e.g. `new File(project.projectDir.toString() + "/src/main/java")`
-- `outputDir`: where the generated `.java` files should be stored
-- `retrofitPackagename`: package name of generated files
+- `inputDir`: location of the JAX RS sources, default `src/main/java`
+- `outputDir`: where the generated `.java` files should be stored, default `target/generated-sources/jaxrs2retrofit`
+- `packageName`: package name of generated files, default `de.bitdroid.jaxrs2retrofit`
 
 ### Ignoring certain resources
 
 In case some JaxRs resources should not be processed (e.g. your super secret admin interface which nobody should know about), a Java regex for matchign resource names can be configured in the gradle task:
 
 ```groovy
-task jaxrs2retrofit(type: de.bitdroid.jaxrs2retrofit.JaxRs2RetrofitTask) {
+jaxRs2Retrofit {
     ...
     excludedClassNamesRegex = "MySuperSecretAdminResource"
 }
@@ -105,7 +105,7 @@ task jaxrs2retrofit(type: de.bitdroid.jaxrs2retrofit.JaxRs2RetrofitTask) {
 By default JaxRs2Retrofit will drop all parameter annotations that it does not know how to deal with, like `@Auth User user`. This behaviour can be customized registering a custom [`ParamConverter`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/ParamConverter.java), for example in the build script:
 
 ```groovy
-task jaxrs2retrofit(type: de.bitdroid.jaxrs2retrofit.JaxRs2RetrofitTask) {
+jaxRs2Retrofit {
     ...
     paramConverterManager.registerConverter(ClassName.get(QueryParam.class), new ParamConverter() {
         @Override
@@ -121,6 +121,11 @@ task jaxrs2retrofit(type: de.bitdroid.jaxrs2retrofit.JaxRs2RetrofitTask) {
 This will convert all parameters annotated with `@QueryParam("<value">)` to `@Query("<value">) String`.
 
 To create your own converter you will need to supply a [`ParamConverter`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/ParamConverter.java) which processes [`AnnotatedParam`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/AnnotatedParam.java) instances and map it to a [`ClassName`](https://square.github.io/javapoet/javadoc/javapoet/com/squareup/javapoet/ClassName.html).
+
+Some prebuilt converters that might be handy:
+
+- [`MapperConverter`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/MappingConverter.java) for mapping one annotation to anther while keeping annotation arguments and parameter type
+- [`IgnoreConverter`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/IgnoreConverter.java) which ignores a parameter completely
 
 
 ### Using the standalone jar
