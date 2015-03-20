@@ -3,6 +3,7 @@ package de.bitdroid.jaxrs2retrofit.resources;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,7 +19,7 @@ public interface CustomAnnotationResource {
 	 */
 	@GET
 	@Path("/value1")
-	public String dropParameter(@CustomAnnotation String value);
+	public String dropParameter(@Size(min=1) String value);
 
 	/**
 	 * Parameter should be converter to a different type.

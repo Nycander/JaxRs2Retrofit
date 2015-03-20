@@ -2,7 +2,6 @@ package de.bitdroid.jaxrs2retrofit;
 
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.TypeName;
 
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.api.InjectionResolver;
@@ -26,8 +25,10 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.constraints.Size;
 
 import de.bitdroid.jaxrs2retrofit.converter.AnnotatedParam;
+import de.bitdroid.jaxrs2retrofit.converter.IgnoreConverter;
 import de.bitdroid.jaxrs2retrofit.converter.ParamConverter;
 import de.bitdroid.jaxrs2retrofit.converter.ParamConverterManager;
 import de.bitdroid.jaxrs2retrofit.resources.CustomAnnotation;
@@ -86,21 +87,18 @@ public final class CustomAnnotationTest extends AbstractResourceTest<CustomAnnot
 	@Override
 	protected ParamConverterManager getParamConverterManager() {
 		ParamConverterManager manager = super.getParamConverterManager();
+		manager.registerConverter(ClassName.get(Size.class), new IgnoreConverter());
 		manager.registerConverter(
 				ClassName.get(CustomAnnotation.class),
 				new ParamConverter() {
 					@Override
 					public AnnotatedParam convert(AnnotatedParam param) {
-						if (TypeName.BOOLEAN.equals(param.getParamType())) {
-							Map<String, Object> args = new HashMap<>();
-							args.put("value", "\"myHeader\"");
-							return new AnnotatedParam(
-									ClassName.get(String.class),
-									ClassName.get(Header.class),
-									args);
-						} else {
-							return null;
-						}
+						Map<String, Object> args = new HashMap<>();
+						args.put("value", "\"myHeader\"");
+						return new AnnotatedParam(
+								ClassName.get(String.class),
+								ClassName.get(Header.class),
+								args);
 					}
 				});
 		return manager;
