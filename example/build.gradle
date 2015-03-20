@@ -21,7 +21,7 @@ def generatedSourcesDir = file('target/generated-sources/jaxrs2retrofit')
 jaxRs2Retrofit {
     inputDir = file('src/main/java')
     outputDir = generatedSourcesDir
-    packageName = 'de.bitdroid.jax2retrofit.example'
+    packageName = 'de.bitdroid.jaxrs2retrofit.example'
     excludedClassNamesRegex = "MyHiddenResource"
     paramConverterManager.registerConverter(ClassName.get(HeaderParam.class), new IgnoreConverter());
 }
