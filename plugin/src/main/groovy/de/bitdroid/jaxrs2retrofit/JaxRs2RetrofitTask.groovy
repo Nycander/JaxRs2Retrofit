@@ -10,9 +10,9 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 
 public class JaxRs2RetrofitTask extends DefaultTask {
-    @InputDirectory File inputDir
-    @OutputDirectory File outputDir = new File("${project.buildDir}/generated/source/jaxrs2retrofit")
-    String retrofitPackageName = "client"
+    @InputDirectory File inputDir = new File("${project.projectDir}/src/main/java")
+    @OutputDirectory File outputDir = new File("${project.projectDir}/target/generated-sources/jaxrs2retrofit")
+    String packageName = 'de.bitdroid.jaxrs2retrofit'
     RetrofitReturnStrategy retrofitReturnStrategy = RetrofitReturnStrategy.BOTH;
     String excludedClassNamesRegex = ""
     ParamConverterManager paramConverterManager = ParamConverterManager.getDefaultInstance();
@@ -21,7 +21,7 @@ public class JaxRs2RetrofitTask extends DefaultTask {
     public void execute(IncrementalTaskInputs inputs) {
         RetrofitGenerator generator = new RetrofitGenerator(
                 retrofitReturnStrategy,
-                retrofitPackageName,
+                packageName,
                 excludedClassNamesRegex,
                 paramConverterManager);
         JavaProjectBuilder builder = new JavaProjectBuilder();
