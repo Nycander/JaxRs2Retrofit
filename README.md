@@ -1,6 +1,7 @@
 
 [![Build Status](https://travis-ci.org/Maddoc42/JaxRs2Retrofit.svg?branch=master)](https://travis-ci.org/Maddoc42/JaxRs2Retrofit)
 [ ![Download](https://api.bintray.com/packages/maddoc42/maven/jaxrs2retrofit/images/download.svg) ](https://bintray.com/maddoc42/maven/jaxrs2retrofit/_latestVersion)
+[![Coverage Status](https://coveralls.io/repos/Maddoc42/JaxRs2Retrofit/badge.svg?branch=master)](https://coveralls.io/r/Maddoc42/JaxRs2Retrofit?branch=master)
 
 # JaxRs2Retrofit
 
