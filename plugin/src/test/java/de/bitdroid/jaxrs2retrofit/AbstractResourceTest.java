@@ -91,7 +91,7 @@ public abstract class AbstractResourceTest<T> {
 
 	@After
 	public void stopServer() {
-		server.stop(0);
+		server.stop(2);
 	}
 
 
