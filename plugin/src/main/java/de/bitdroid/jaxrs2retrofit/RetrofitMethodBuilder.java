@@ -9,8 +9,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import javax.lang.model.element.Modifier;
@@ -83,9 +81,11 @@ public final class RetrofitMethodBuilder {
 	}
 
 
-	public List<MethodSpec> build() {
-		List<MethodSpec> result = new LinkedList<>();
-		for (MethodSpec.Builder builder : methodBuilders.values()) result.add(builder.build());
+	public Map<RetrofitReturnStrategy, MethodSpec> build() {
+		Map<RetrofitReturnStrategy, MethodSpec> result = new HashMap<>();
+		for (Map.Entry<RetrofitReturnStrategy, MethodSpec.Builder> entry : methodBuilders.entrySet()) {
+			result.put(entry.getKey(), entry.getValue().build());
+		}
 		return result;
 	}
 

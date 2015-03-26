@@ -19,9 +19,9 @@ import com.thoughtworks.qdox.model.expression.Add;
 import com.thoughtworks.qdox.model.expression.AnnotationValue;
 
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,7 +84,7 @@ public final class RetrofitGenerator {
 		addAboutJavadoc(retrofitResourceBuilder);
 
 		for (JavaMethod jaxRsMethod : jaxRsClass.getMethods()) {
-			List<MethodSpec> retrofitMethods = createMethod(jaxRsClass, jaxRsMethod, jaxRsPath, jaxRsConsumes);
+			Collection<MethodSpec> retrofitMethods = createMethod(jaxRsClass, jaxRsMethod, jaxRsPath, jaxRsConsumes);
 			if (retrofitMethods != null) {
 				for (MethodSpec method : retrofitMethods) {
 					retrofitResourceBuilder.addMethod(method);
@@ -107,7 +107,7 @@ public final class RetrofitGenerator {
 	}
 
 
-	private List<MethodSpec> createMethod(
+	private Collection<MethodSpec> createMethod(
 			JavaClass jaxRsClass,
 			JavaMethod jaxRsMethod,
 			JavaAnnotation jaxRsPath,
@@ -154,7 +154,7 @@ public final class RetrofitGenerator {
 		}
 		retrofitMethodBuilder.setReturnType(retrofitReturnType);
 
-		return retrofitMethodBuilder.build();
+		return retrofitMethodBuilder.build().values();
 	}
 
 
