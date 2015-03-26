@@ -35,5 +35,5 @@ idea {
 dependencies {
     compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
-    compile 'com.squareup:javapoet:1.0.0'
+    compile 'io.reactivex:rxjava:1.0.8'
 }
