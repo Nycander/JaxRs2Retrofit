@@ -40,10 +40,13 @@ import retrofit.http.Path;
 public interface SimpleResource {
 
   @GET("/helloworld/{path}")
-  String getHelloWorld(@Path("path") String path);
+  void getHelloWorld(@Path("path") String path, Callback<String> callback);
+
+  @GET("/helloworld/{path}")
+  Observable<String> getHelloWorld(@Path("path") String path);
   
   @GET("/helloworld/{path}")
-  void getHelloWorld(@Path("path") String path, Callback<String> callback);
+  String getHelloWorldSynchronously(@Path("path") String path);
 
 }
 ```
@@ -138,7 +141,7 @@ Running the jar without any arguments will print a short help message. Options a
 
 - Support for `GET`, `PUT`, `POST`, `DELETE` and `HEAD` http methods
 - Converts `QueryParam`, `PathParam` and `HeaderParam` to their Retrofit counterpart
-- Return values can be configured to use `retrofit.Callback`, behave normally or use both
+- Return values can be configured to use `retrofit.Callback`, `rx.Observable`, behave normally or use all three
 - Skip classes / methods that lack JAX RS annotations
 - Map `javax.ws.rs.core.Response` to `retrofit.client.Response`
 - Custom annotation processing (e.g. `@Auth`) via [`ParamConverter`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/ParamConverter.java)
