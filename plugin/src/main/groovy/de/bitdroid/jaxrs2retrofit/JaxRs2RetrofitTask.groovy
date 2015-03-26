@@ -10,6 +10,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs
 
 public class JaxRs2RetrofitTask extends DefaultTask {
+
     @InputDirectory File inputDir = new File("${project.projectDir}/src/main/java")
     @OutputDirectory File outputDir = new File("${project.projectDir}/target/generated-sources/jaxrs2retrofit")
     String packageName = 'de.bitdroid.jaxrs2retrofit'
@@ -31,6 +32,12 @@ public class JaxRs2RetrofitTask extends DefaultTask {
             if (javaFile == null) continue;
             javaFile.writeTo(outputDir);
         }
+    }
+
+
+    @Override
+    public String getDescription() {
+        return 'Creates Retrofit interfaces base on JAX RS resources.';
     }
 
  }
