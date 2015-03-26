@@ -70,7 +70,6 @@ apply plugin: 'de.bitdroid.jaxrs2retrofit'
 
 buildscript {
     repositories {
-        mavenLocal()
         jcenter()
     }
     dependencies {
