@@ -1,4 +1,4 @@
-package de.bitdroid.jaxrs2retrofit;
+package de.bitdroid.jaxrs2retrofit.integration;
 
 
 import org.junit.Test;
@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import de.bitdroid.jaxrs2retrofit.resources.ResponseMappingResource;
+import de.bitdroid.jaxrs2retrofit.integration.resources.ResponseMappingResource;
 import mockit.Mocked;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;

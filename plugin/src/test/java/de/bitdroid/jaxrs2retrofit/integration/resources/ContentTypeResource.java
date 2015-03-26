@@ -1,4 +1,4 @@
-package de.bitdroid.jaxrs2retrofit.resources;
+package de.bitdroid.jaxrs2retrofit.integration.resources;
 
 
 import javax.ws.rs.Consumes;

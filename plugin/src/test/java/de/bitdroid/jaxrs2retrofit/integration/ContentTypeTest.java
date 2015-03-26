@@ -1,10 +1,10 @@
-package de.bitdroid.jaxrs2retrofit;
+package de.bitdroid.jaxrs2retrofit.integration;
 
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import de.bitdroid.jaxrs2retrofit.resources.ContentTypeResource;
+import de.bitdroid.jaxrs2retrofit.integration.resources.ContentTypeResource;
 import mockit.Mocked;
 import mockit.Verifications;
 import mockit.integration.junit4.JMockit;

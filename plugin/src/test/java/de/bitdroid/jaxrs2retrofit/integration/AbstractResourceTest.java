@@ -1,4 +1,4 @@
-package de.bitdroid.jaxrs2retrofit;
+package de.bitdroid.jaxrs2retrofit.integration;
 
 
 import com.squareup.javapoet.JavaFile;
@@ -22,8 +22,10 @@ import java.net.URLClassLoader;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
+import de.bitdroid.jaxrs2retrofit.RetrofitGenerator;
+import de.bitdroid.jaxrs2retrofit.RetrofitReturnStrategy;
 import de.bitdroid.jaxrs2retrofit.converter.ParamConverterManager;
-import de.bitdroid.jaxrs2retrofit.resources.SimpleResource;
+import de.bitdroid.jaxrs2retrofit.integration.resources.SimpleResource;
 import mockit.integration.junit4.JMockit;
 import retrofit.RestAdapter;
 

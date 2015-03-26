@@ -1,4 +1,4 @@
-package de.bitdroid.jaxrs2retrofit;
+package de.bitdroid.jaxrs2retrofit.integration;
 
 
 import com.squareup.javapoet.ClassName;
@@ -31,15 +31,15 @@ import de.bitdroid.jaxrs2retrofit.converter.AnnotatedParam;
 import de.bitdroid.jaxrs2retrofit.converter.IgnoreConverter;
 import de.bitdroid.jaxrs2retrofit.converter.ParamConverter;
 import de.bitdroid.jaxrs2retrofit.converter.ParamConverterManager;
-import de.bitdroid.jaxrs2retrofit.resources.CustomAnnotation;
-import de.bitdroid.jaxrs2retrofit.resources.CustomAnnotationResource;
+import de.bitdroid.jaxrs2retrofit.integration.resources.CustomAnnotation;
+import de.bitdroid.jaxrs2retrofit.integration.resources.CustomAnnotationResource;
 import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
 import retrofit.http.Header;
 
 
 /**
- * Tests that the {@link de.bitdroid.jaxrs2retrofit.resources.CustomAnnotation} is correctly converted
+ * Tests that the {@link de.bitdroid.jaxrs2retrofit.integration.resources.CustomAnnotation} is correctly converted
  * to some other value.
  */
 @RunWith(JMockit.class)
