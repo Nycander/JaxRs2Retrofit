@@ -37,6 +37,8 @@ public abstract class AbstractResourceTest<T> {
 			RESOURCES_DIR = System.getProperty("user.dir") + "/src/test/java/" + SimpleResource.class.getPackage().getName().replaceAll("\\.", "/"),
 			CLIENT_PACKAGE = "client";
 
+	protected static final String SYNCHRONOUS_METHODS_PREFIX = "Synchronously";
+
 	private final Class<T> resourceClass;
 	private HttpServer server;
 
@@ -65,7 +67,7 @@ public abstract class AbstractResourceTest<T> {
 		JavaClass resource = builder.getClassByName(resourceClass.getName());
 
 		// generate retrofit client
-		RetrofitGenerator generator = new RetrofitGenerator(RetrofitReturnStrategy.BOTH, CLIENT_PACKAGE, "", getParamConverterManager());
+		RetrofitGenerator generator = new RetrofitGenerator(RetrofitReturnStrategy.ALL, CLIENT_PACKAGE, "", getParamConverterManager());
 		JavaFile clientSource = generator.createResource(resource);
 
 		// write client to file
@@ -85,7 +87,7 @@ public abstract class AbstractResourceTest<T> {
 		RestAdapter adapter = getRestAdapterBuilder().build();
 
 		this.client = adapter.create(clientClass);
-		Assert.assertEquals(2 * resourceClass.getDeclaredMethods().length, clientClass.getDeclaredMethods().length);
+		Assert.assertEquals(3 * resourceClass.getDeclaredMethods().length, clientClass.getDeclaredMethods().length);
 	}
 
 

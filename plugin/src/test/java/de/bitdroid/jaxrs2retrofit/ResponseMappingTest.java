@@ -29,9 +29,9 @@ public final class ResponseMappingTest extends AbstractResourceTest<ResponseMapp
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testResponseMapping() throws Exception {
-		doTestResponseMapping(client, clientClass.getDeclaredMethod("getSomething"), false);
+		doTestResponseMapping(client, clientClass.getDeclaredMethod("getSomething" + SYNCHRONOUS_METHODS_PREFIX), false);
 		doTestResponseMapping(client, clientClass.getDeclaredMethod("getSomething", Callback.class), true);
-		doTestResponseMapping(client, clientClass.getDeclaredMethod("deleteSomething"), false);
+		doTestResponseMapping(client, clientClass.getDeclaredMethod("deleteSomething" + SYNCHRONOUS_METHODS_PREFIX), false);
 		doTestResponseMapping(client, clientClass.getDeclaredMethod("deleteSomething", Callback.class), true);
 		new Verifications() {{
 			resource.getSomething(); times = 2;

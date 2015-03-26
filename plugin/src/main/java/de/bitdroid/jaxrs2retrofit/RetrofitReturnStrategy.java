@@ -5,6 +5,7 @@ public enum RetrofitReturnStrategy {
 
 	REGULAR, 	// regular Java return types
 	CALLBACK,	// Retrofit callbacks with 'void' return type
-	BOTH;		// both regular Java return types and Retrofit callbacks
+	OBSERVABLE,	// Rx Observables
+	ALL			// both regular Java return types and Retrofit callbacks
 
 }

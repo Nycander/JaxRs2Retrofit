@@ -21,7 +21,6 @@ import com.thoughtworks.qdox.model.expression.AnnotationValue;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -35,7 +34,6 @@ import javax.ws.rs.core.MediaType;
 import de.bitdroid.jaxrs2retrofit.converter.AnnotatedParam;
 import de.bitdroid.jaxrs2retrofit.converter.ParamConverter;
 import de.bitdroid.jaxrs2retrofit.converter.ParamConverterManager;
-import retrofit.Callback;
 import retrofit.client.Response;
 import retrofit.http.Headers;
 
@@ -115,10 +113,9 @@ public final class RetrofitGenerator {
 			JavaAnnotation jaxRsPath,
 			JavaAnnotation jaxRsConsumes) {
 
-		List<MethodSpec> retrofitMethods = new LinkedList<>();
-		MethodSpec.Builder retrofitMethodBuilder = MethodSpec
-				.methodBuilder(jaxRsMethod.getName())
-				.addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
+		RetrofitMethodBuilder retrofitMethodBuilder = new RetrofitMethodBuilder(
+				jaxRsMethod.getName(),
+				retrofitReturnStrategy);
 
 		// find method type and path
 		JavaAnnotation jaxRsMethodPath = null;
@@ -137,13 +134,11 @@ public final class RetrofitGenerator {
 		EvaluatingVisitor evaluatingVisitor = new SimpleEvaluatingVisitor(jaxRsClass);
 
 		// add path
-		retrofitMethodBuilder
-				.addAnnotation(createPathAnnotation(evaluatingVisitor, httpMethod, jaxRsPath, jaxRsMethodPath));
+		retrofitMethodBuilder.addAnnotation(createPathAnnotation(evaluatingVisitor, httpMethod, jaxRsPath, jaxRsMethodPath));
 
 		// add content type
 		if (jaxRsConsumes != null) {
-			retrofitMethodBuilder
-					.addAnnotation(createContentTypeAnnotation(evaluatingVisitor, jaxRsConsumes));
+			retrofitMethodBuilder.addAnnotation(createContentTypeAnnotation(evaluatingVisitor, jaxRsConsumes));
 		}
 
 		// create parameters
@@ -157,20 +152,9 @@ public final class RetrofitGenerator {
 		if (retrofitReturnType.equals(TypeName.VOID)) {
 			retrofitReturnType = ClassName.get(Response.class);
 		}
-		if (RetrofitReturnStrategy.REGULAR.equals(retrofitReturnStrategy) || RetrofitReturnStrategy.BOTH.equals(retrofitReturnStrategy)) {
-			retrofitMethodBuilder.returns(retrofitReturnType);
-			retrofitMethods.add(retrofitMethodBuilder.build());
-		}
-		if (RetrofitReturnStrategy.CALLBACK.equals(retrofitReturnStrategy) || RetrofitReturnStrategy.BOTH.equals(retrofitReturnStrategy)) {
-			ParameterSpec callback = ParameterSpec
-					.builder(ParameterizedTypeName.get(ClassName.get(Callback.class), retrofitReturnType), "callback")
-					.build();
-			retrofitMethodBuilder.addParameter(callback);
-			retrofitMethodBuilder.returns(TypeName.VOID);
-			retrofitMethods.add(retrofitMethodBuilder.build());
-		}
+		retrofitMethodBuilder.setReturnType(retrofitReturnType);
 
-		return retrofitMethods;
+		return retrofitMethodBuilder.build();
 	}
 
 

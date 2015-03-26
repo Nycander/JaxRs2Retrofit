@@ -25,9 +25,9 @@ public final class PathRegexResourceTest extends AbstractResourceTest<PathRegexR
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testRegexElimination() throws Exception {
-		Method regexMethod = clientClass.getDeclaredMethod("getRegex", String.class, String.class);
+		Method regexMethod = clientClass.getDeclaredMethod("getRegex" + SYNCHRONOUS_METHODS_PREFIX, String.class, String.class);
 		regexMethod.invoke(client, "somePath", "someOtherPath");
-		clientClass.getDeclaredMethod("getRegular").invoke(client);
+		clientClass.getDeclaredMethod("getRegular" + SYNCHRONOUS_METHODS_PREFIX).invoke(client);
 
 		new Verifications() {{
 			resource.getRegex(anyString, anyString); times = 1;

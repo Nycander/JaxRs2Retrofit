@@ -24,8 +24,8 @@ public final class ContentTypeTest extends AbstractResourceTest<ContentTypeResou
 	@SuppressWarnings("unchecked")
 	public void testResponseMapping() throws Exception {
 		// simply run methods as Jersey will return 415 if content type is incorrect.
-		clientClass.getDeclaredMethod("getJson", String.class).invoke(client, "some json");
-		clientClass.getDeclaredMethod("getXml", String.class).invoke(client, "some xml");
+		clientClass.getDeclaredMethod("getJson" + SYNCHRONOUS_METHODS_PREFIX, String.class).invoke(client, "some json");
+		clientClass.getDeclaredMethod("getXml" + SYNCHRONOUS_METHODS_PREFIX, String.class).invoke(client, "some xml");
 
 		new Verifications() {{
 			resource.getJson(anyString); times = 1;

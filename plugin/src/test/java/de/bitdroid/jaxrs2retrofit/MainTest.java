@@ -88,7 +88,7 @@ public final class MainTest {
 		Main.main(new String[] { "-src", DUMMY_SOURCE_FILENAME, "-exclude", excludeRegex });
 
 		new Verifications() {{
-			new RetrofitGenerator(RetrofitReturnStrategy.BOTH, anyString, excludeRegex, (ParamConverterManager) any);
+			new RetrofitGenerator(RetrofitReturnStrategy.ALL, anyString, excludeRegex, (ParamConverterManager) any);
 			generator.createResource(javaClass);
 		}};
 

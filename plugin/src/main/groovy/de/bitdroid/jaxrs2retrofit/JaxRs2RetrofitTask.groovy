@@ -13,7 +13,7 @@ public class JaxRs2RetrofitTask extends DefaultTask {
     @InputDirectory File inputDir = new File("${project.projectDir}/src/main/java")
     @OutputDirectory File outputDir = new File("${project.projectDir}/target/generated-sources/jaxrs2retrofit")
     String packageName = 'de.bitdroid.jaxrs2retrofit'
-    RetrofitReturnStrategy retrofitReturnStrategy = RetrofitReturnStrategy.BOTH;
+    RetrofitReturnStrategy retrofitReturnStrategy = RetrofitReturnStrategy.ALL;
     String excludedClassNamesRegex = ""
     ParamConverterManager paramConverterManager = ParamConverterManager.getDefaultInstance();
 

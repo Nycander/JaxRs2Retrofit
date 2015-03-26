@@ -44,7 +44,7 @@ public final class Main {
 		if (commandLine.hasOption(OPTION_EXCLUDED_CLASSES)) excludedClassNamesRegex = commandLine.getOptionValue(OPTION_EXCLUDED_CLASSES);
 
 		RetrofitGenerator generator = new RetrofitGenerator(
-				RetrofitReturnStrategy.BOTH,
+				RetrofitReturnStrategy.ALL,
 				"client",
 				excludedClassNamesRegex,
 				ParamConverterManager.getDefaultInstance());
