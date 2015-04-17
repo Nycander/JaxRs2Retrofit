@@ -1,13 +1,11 @@
 # Generated files
 *.class
 build
-target
+java-gen
+local.properties
 
-# Package files
-*.war
-*.ear
-
-# IDE / build files
+# IDE files
 .idea
 *.iml
 .gradle
+*.swp

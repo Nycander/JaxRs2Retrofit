@@ -12,11 +12,11 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'de.bitdroid.jaxrs2retrofit:plugin:0.2.0'
+        classpath 'de.bitdroid.jaxrs2retrofit:plugin:0.3.0'
     }
 }
 
-def generatedSourcesDir = file('target/generated-sources/jaxrs2retrofit')
+def generatedSourcesDir = file('src/main/java-gen')
 
 jaxRs2Retrofit {
     inputDir = file('src/main/java')
