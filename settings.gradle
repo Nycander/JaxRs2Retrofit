@@ -1,1 +1,1 @@
-include ':plugin', ':example-java'
+include ':plugin', ':example-java', ':example-server'
