@@ -83,14 +83,44 @@ which creates a new gradle task called `jaxRs2Retrofit` that will generate the c
 ```groovy
 jaxRs2Retrofit {
     inputDir = file('src/main/java')
-    outputDir = file('target/generated-sources/jaxrs2retrofit')
+    outputDir = file('src/main/java-gen')
     packageName = 'de.bitdroid.jaxrs2retrofit'
 }
 ```
 
 - `inputDir`: location of the JAX RS sources, default `src/main/java`
-- `outputDir`: where the generated `.java` files should be stored, default `target/generated-sources/jaxrs2retrofit`
+- `outputDir`: where the generated `.java` files should be stored, default `build/generated/source/jaxrs2retrofit`
 - `packageName`: package name of generated files, default `de.bitdroid.jaxrs2retrofit`
+
+
+### Android
+
+In case you are developing for Android, configuring the plugin has to be done slightly different, as the plugin will create one JaxRs2Retrofit task for each build variant (e.g. debug, release, demo, ...).
+
+```groovy
+def generatedSourcesDir = file('src/main/java-gen')
+def mainSourcesDir = file('src/main/java')
+
+android {
+    ...
+    sourceSets {
+        main {
+            java {
+                srcDir mainSourcesDir
+                srcDir generatedSourcesDir
+            }
+        }
+    }
+}
+
+afterEvaluate {
+    project.tasks.matching { it.name.startsWith('jaxRs2Retrofit') }.each {
+        it.inputDir = file('/path/to/my/jaxrs/sources')
+        it.outputDir = generatedSourcesDir
+        it.packageName = 'de.bitdroid.jaxrs2retrofit'
+    }
+}
+```
 
 ### Ignoring certain resources
 
