@@ -13,11 +13,6 @@ buildscript {
 }
 
 
-repositories {
-	jcenter()
-}
-
-
 def generatedSourcesDir = file('src/main/java-gen')
 def mainSourcesDir = file('src/main/java')
 
