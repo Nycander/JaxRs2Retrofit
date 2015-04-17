@@ -58,5 +58,4 @@ afterEvaluate {
 dependencies {
     compile 'io.reactivex:rxjava:1.0.9'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
-    compile 'com.android.support:appcompat-v7:22.0.0'
 }
