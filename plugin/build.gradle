@@ -14,6 +14,7 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
 
+    compile 'com.android.tools.build:gradle:1.1.1'
     compile 'commons-cli:commons-cli:1.2'
     compile 'com.thoughtworks.qdox:qdox:2.0-M3'
     compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
@@ -49,7 +50,7 @@ jacocoTestReport {
 
 
 group = 'de.bitdroid.jaxrs2retrofit'
-version = '0.2.0'
+version = '0.3.0'
 
 
 publishing {
