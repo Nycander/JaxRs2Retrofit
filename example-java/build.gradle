@@ -19,7 +19,7 @@ buildscript {
 def generatedSourcesDir = file('src/main/java-gen')
 
 jaxRs2Retrofit {
-    inputDir = file('src/main/java')
+    inputDir = file(project(':example-server').projectDir.toString() + '/src/main/java')
     outputDir = generatedSourcesDir
     packageName = 'de.bitdroid.jaxrs2retrofit.example'
     excludedClassNamesRegex = "MyHiddenResource"
@@ -33,7 +33,6 @@ idea {
 }
 
 dependencies {
-    compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
     compile 'io.reactivex:rxjava:1.0.8'
 }
