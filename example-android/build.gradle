@@ -1,0 +1,67 @@
+apply plugin: 'com.android.application'
+apply plugin: 'de.bitdroid.jaxrs2retrofit'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.1.1'
+        classpath 'de.bitdroid.jaxrs2retrofit:plugin:0.3.0'
+    }
+}
+
+
+repositories {
+	jcenter()
+}
+
+
+def generatedSourcesDir = file('src/main/java-gen')
+def mainSourcesDir = file('src/main/java')
+
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
+
+    defaultConfig {
+        applicationId "de.bitdroid.jaxrs2retrofit.example"
+        minSdkVersion 14
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets {
+        main {
+            java {
+                srcDir mainSourcesDir
+                srcDir generatedSourcesDir
+            }
+        }
+    }
+}
+
+
+afterEvaluate {
+    project.tasks.matching { it.name.startsWith('jaxRs2Retrofit') }.each {
+        it.inputDir = file(project(':example-server').projectDir.toString() + '/src/main/java')
+        it.outputDir = generatedSourcesDir
+        it.packageName = 'de.bitdroid.jaxrs2retrofit.example'
+        it.excludedClassNamesRegex = "MyHiddenResource"
+    }
+}
+
+
+dependencies {
+    compile 'io.reactivex:rxjava:1.0.9'
+    compile 'com.squareup.retrofit:retrofit:1.9.0'
+    compile 'com.android.support:appcompat-v7:22.0.0'
+}
