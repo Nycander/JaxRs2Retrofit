@@ -78,22 +78,21 @@ buildscript {
 }
 ```
 
-which creates a new gradle task called `jaxRs2Retrofit` that will generate the client interfaces. Optionally a number of configurations can be supplied
+which creates a new gradle task called `jaxRs2Retrofit` that will generate the client interfaces.
+
+## Configuration for regular Java
+
+While configuration is optional, below is a minimal set of options that you will probably want to change:
 
 ```groovy
 jaxRs2Retrofit {
-    inputDir = file('src/main/java')
-    outputDir = file('src/main/java-gen')
-    packageName = 'de.bitdroid.jaxrs2retrofit'
+    inputDir = file('your/jax/rs/sources/files') // e.g. file(project(':example-server').projectDir.toString() + '/src/main/java'
+    outputDir = file('where/Retrofit/files/should/go') // e.g. file('src/main/java-gen')
+    packageName = 'your.package.name '
 }
 ```
 
-- `inputDir`: location of the JAX RS sources, default `src/main/java`
-- `outputDir`: where the generated `.java` files should be stored, default `build/generated/source/jaxrs2retrofit`
-- `packageName`: package name of generated files, default `de.bitdroid.jaxrs2retrofit`
-
-
-### Android
+### Configuration for Android
 
 In case you are developing for Android, configuring the plugin has to be done slightly different, as the plugin will create one JaxRs2Retrofit task for each build variant (e.g. debug, release, demo, ...).
 
@@ -121,6 +120,30 @@ afterEvaluate {
     }
 }
 ```
+
+### Generating only blocking / callback / Observable Retrofit methods
+
+JaxRs2Retrofit supports generating the following Retrofit methods for each (!) JaxRs method:
+
+- blocking: the "regular" Retrofit methods which will block the current thread when being called, e.g. ```public String getHelloWorld();```
+- callback: method which has a Retrofit [`Callback`](https://square.github.io/retrofit/javadoc/retrofit/Callback.html) as an parameter, e.g. ```public void getHelloWorld(Callback<String> callback);```
+- observable: returns an [JaxRs Observable Object](https://github.com/ReactiveX/RxJava/wiki/Observable), for those who love reactive programming, e.g. ```public Observable<String> getHelloWorld();```
+
+Not every project is interested in using all three options (especially since JaxRs introduces a new dependency),
+so which method 'type' gets generated can be configured like
+
+
+```groovy
+jaxRs2Retrofit {
+    ...
+    generateSynchronousMethods = true
+    generateCallbackMethods = true
+    generateRxJavaMethods = true
+}
+```
+
+Default is `true` for all three.
+
 
 ### Ignoring certain resources
 
