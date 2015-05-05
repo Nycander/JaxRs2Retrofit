@@ -51,19 +51,9 @@ public interface SimpleResource {
 }
 ```
 
-## Download
+## Download and install
 
-JaxRs2Retrofit can either be used as a gradle plugin, by directly using the generator classes or as a 
-standalone jar.
-
-The first two are available at available at [jcenter](https://bintray.com/maddoc42/maven/jaxrs2retrofit/).
-For gradle based builds:
-
-`'de.bitdroid.jaxrs2retrofit:plugin:<latest_version>'`
-
-## Using the gradle plugin
-
-... can be as simple as applying the plugin
+JaxRs2Retrofit is available at [jcenter](https://bintray.com/maddoc42/maven/jaxrs2retrofit/). To start using the plugin apply the following to your 'build.gradle'
 
 ```groovy
 apply plugin: 'de.bitdroid.jaxrs2retrofit'
@@ -73,7 +63,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'de.bitdroid.jaxrs2retrofit:plugin:<latest_version>'
+        classpath 'de.bitdroid.jaxrs2retrofit:plugin:0.4.0'
     }
 }
 ```
@@ -183,10 +173,6 @@ Some prebuilt converters that might be handy:
 - [`MapperConverter`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/MappingConverter.java) for mapping one annotation to anther while keeping annotation arguments and parameter type
 - [`IgnoreConverter`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/IgnoreConverter.java) which ignores a parameter completely
 
-
-### Using the standalone jar
-
-Running the jar without any arguments will print a short help message. Options are similar to those of the gradle task.
 
 
 ## Features
