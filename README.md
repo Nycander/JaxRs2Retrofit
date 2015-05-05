@@ -174,6 +174,17 @@ Some prebuilt converters that might be handy:
 - [`IgnoreConverter`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/IgnoreConverter.java) which ignores a parameter completely
 
 
+## Example
+
+For an example of how JaxRs2Retrofit can be configured on a real application have a look at the following `example-*` folders in the repository:
+
+- **example-server**: a simple JaxRs server application (built using [Dropwizard](http://www.dropwizard.io/))
+- **example-common**: model classes that are being shared between potential clients and the server app
+- **example-java**: a (very) short Java application which has JaxRs2Retrofit configured to create Retrofit interfaces based on `example-server`
+- **example-android**: same as `example-java` but using Android instead
+
+Note that all four components are configured as Gradle modules (see the `settings.gradle`), which allows the server and clients to depend on the `example-common` module (see `compile project(':example-common')` in the respective `build.gradle` files).
+
 
 ## Features
 
