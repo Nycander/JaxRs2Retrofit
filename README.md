@@ -125,9 +125,9 @@ afterEvaluate {
 
 JaxRs2Retrofit supports generating the following Retrofit methods for each (!) JaxRs method:
 
-- blocking: the "regular" Retrofit methods which will block the current thread when being called, e.g. ```public String getHelloWorld();```
-- callback: method which has a Retrofit [`Callback`](https://square.github.io/retrofit/javadoc/retrofit/Callback.html) as an parameter, e.g. ```public void getHelloWorld(Callback<String> callback);```
-- observable: returns an [JaxRs Observable Object](https://github.com/ReactiveX/RxJava/wiki/Observable), for those who love reactive programming, e.g. ```public Observable<String> getHelloWorld();```
+- **blocking**: the "regular" Retrofit methods which will block the current thread when being called, e.g. ```public String getHelloWorld();```
+- **callback**: method which has a [Retrofit `Callback`](https://square.github.io/retrofit/javadoc/retrofit/Callback.html) as an parameter, e.g. ```public void getHelloWorld(Callback<String> callback);```
+- **observable**: returns an [JaxRs Observable Object](https://github.com/ReactiveX/RxJava/wiki/Observable), for those who love reactive programming, e.g. ```public Observable<String> getHelloWorld();```
 
 Not every project is interested in using all three options (especially since JaxRs introduces a new dependency),
 so which method 'type' gets generated can be configured like
