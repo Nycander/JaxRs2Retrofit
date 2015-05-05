@@ -33,32 +33,20 @@ import javax.ws.rs.core.MediaType;
 
 import de.bitdroid.jaxrs2retrofit.converter.AnnotatedParam;
 import de.bitdroid.jaxrs2retrofit.converter.ParamConverter;
-import de.bitdroid.jaxrs2retrofit.converter.ParamConverterManager;
 import retrofit.client.Response;
 import retrofit.http.Headers;
 
 public final class RetrofitGenerator {
 
-	private final RetrofitReturnStrategy retrofitReturnStrategy;
-	private final String packageName;
-	private final String excludedClassNamesRegex;
+	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy 'at' HH:mm");
+
+	private final GeneratorSettings settings;
 	private final Date currentDate;
-	private final SimpleDateFormat dateFormat;
-	private final ParamConverterManager paramConverterManager;
 
 
-	public RetrofitGenerator(
-			RetrofitReturnStrategy retrofitReturnStrategy,
-			String packageName,
-			String excludedClassNamesRegex,
-			ParamConverterManager paramConverterManager) {
-
-		this.retrofitReturnStrategy = retrofitReturnStrategy;
-		this.packageName = packageName;
-		this.excludedClassNamesRegex = excludedClassNamesRegex;
+	public RetrofitGenerator(GeneratorSettings settings) {
+		this.settings = settings;
 		this.currentDate = new Date();
-		this.dateFormat = new SimpleDateFormat("dd.MM.yyyy 'at' HH:mm");
-		this.paramConverterManager = paramConverterManager;
 	}
 
 
@@ -75,7 +63,7 @@ public final class RetrofitGenerator {
 			}
 		}
 		if (jaxRsPath == null) return null; // no a valid JAX RS resource
-		if (jaxRsClass.getName().matches(excludedClassNamesRegex)) return null;
+		if (jaxRsClass.getName().matches(settings.getExcludedClassNamesRegex())) return null;
 
 		System.out.println(jaxRsClass.getName());
 		TypeSpec.Builder retrofitResourceBuilder = TypeSpec
@@ -92,7 +80,7 @@ public final class RetrofitGenerator {
 			}
 		}
 
-		return JavaFile.builder(packageName, retrofitResourceBuilder.build()).build();
+		return JavaFile.builder(settings.getPackageName(), retrofitResourceBuilder.build()).build();
 	}
 
 
@@ -115,7 +103,7 @@ public final class RetrofitGenerator {
 
 		RetrofitMethodBuilder retrofitMethodBuilder = new RetrofitMethodBuilder(
 				jaxRsMethod.getName(),
-				retrofitReturnStrategy);
+				settings);
 
 		// find method type and path
 		JavaAnnotation jaxRsMethodPath = null;
@@ -169,16 +157,16 @@ public final class RetrofitGenerator {
 		for (JavaAnnotation annotation : jaxRsParameter.getAnnotations()) {
 			annotationType = (ClassName) createType(annotation.getType());
 			jaxRsAnnotation = annotation;
-			if (paramConverterManager.hasConverter(annotationType)) break;
+			if (settings.getParamConverterManager().hasConverter(annotationType)) break;
 		}
 
 		// find suitable converter
-		ParamConverter converter = paramConverterManager.getConverter(annotationType);
+		ParamConverter converter = settings.getParamConverterManager().getConverter(annotationType);
 
 		// if no converter was found, ignore annotation
 		if (converter == null) {
 			annotationType = ClassName.get(Void.class);
-			converter = paramConverterManager.getConverter(annotationType);
+			converter = settings.getParamConverterManager().getConverter(annotationType);
 		}
 
 		// if still no converted is found, ignore parameter completely (should (TM) only happen when

@@ -22,8 +22,8 @@ import java.net.URLClassLoader;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
+import de.bitdroid.jaxrs2retrofit.GeneratorSettings;
 import de.bitdroid.jaxrs2retrofit.RetrofitGenerator;
-import de.bitdroid.jaxrs2retrofit.RetrofitReturnStrategy;
 import de.bitdroid.jaxrs2retrofit.converter.ParamConverterManager;
 import de.bitdroid.jaxrs2retrofit.integration.resources.SimpleResource;
 import mockit.integration.junit4.JMockit;
@@ -69,7 +69,7 @@ public abstract class AbstractResourceTest<T> {
 		JavaClass resource = builder.getClassByName(resourceClass.getName());
 
 		// generate retrofit client
-		RetrofitGenerator generator = new RetrofitGenerator(RetrofitReturnStrategy.ALL, CLIENT_PACKAGE, "", getParamConverterManager());
+		RetrofitGenerator generator = new RetrofitGenerator(new GeneratorSettings(CLIENT_PACKAGE, "", true, true, true, getParamConverterManager()));
 		JavaFile clientSource = generator.createResource(resource);
 
 		// write client to file

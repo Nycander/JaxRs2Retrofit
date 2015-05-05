@@ -14,17 +14,22 @@ public class JaxRs2RetrofitTask extends DefaultTask {
     @InputDirectory File inputDir = new File("${project.projectDir}/src/main/java")
     @OutputDirectory File outputDir = new File("${project.projectDir}/build/generated/source/jaxrs2retrofit")
     String packageName = 'de.bitdroid.jaxrs2retrofit'
-    RetrofitReturnStrategy retrofitReturnStrategy = RetrofitReturnStrategy.ALL;
-    String excludedClassNamesRegex = ""
+    String excludedClassNamesRegex = ''
+    boolean generateSynchronousMethods = true;
+    boolean generateCallbackMethods = true;
+    boolean generateRxJavaMethods = true;
     ParamConverterManager paramConverterManager = ParamConverterManager.getDefaultInstance();
 
     @TaskAction
     public void execute(IncrementalTaskInputs inputs) {
         RetrofitGenerator generator = new RetrofitGenerator(
-                retrofitReturnStrategy,
-                packageName,
-                excludedClassNamesRegex,
-                paramConverterManager);
+                new GeneratorSettings(
+                        packageName,
+                        excludedClassNamesRegex,
+                        generateSynchronousMethods,
+                        generateCallbackMethods,
+                        generateRxJavaMethods,
+                        paramConverterManager));
         JavaProjectBuilder builder = new JavaProjectBuilder();
         builder.addSourceTree(inputDir);
         for (JavaClass javaClass : builder.getClasses()) {

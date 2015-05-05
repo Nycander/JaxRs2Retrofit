@@ -20,22 +20,20 @@ public final class RetrofitMethodBuilder {
 
 	private static final String SYNCHRONOUS_METHODS_PREFIX = "Synchronously";
 
-	private final RetrofitReturnStrategy returnType;
 	private final Map<RetrofitReturnStrategy, MethodSpec.Builder> methodBuilders = new HashMap<>();
 
-	public RetrofitMethodBuilder(String methodName, RetrofitReturnStrategy returnType) {
-		this.returnType = returnType;
-		if (isMatchingReturnType(RetrofitReturnStrategy.REGULAR)) {
+	public RetrofitMethodBuilder(String methodName, GeneratorSettings settings) {
+		if (settings.getGenerateSynchronousMethods()) {
 			methodBuilders.put(
 					RetrofitReturnStrategy.REGULAR,
 					applyModifiers(MethodSpec.methodBuilder(methodName + SYNCHRONOUS_METHODS_PREFIX)));
 		}
-		if (isMatchingReturnType(RetrofitReturnStrategy.CALLBACK)) {
+		if (settings.getGenerateCallbackMethods()) {
 			methodBuilders.put(
 					RetrofitReturnStrategy.CALLBACK,
 					applyModifiers(MethodSpec.methodBuilder(methodName)));
 		}
-		if (isMatchingReturnType(RetrofitReturnStrategy.OBSERVABLE)) {
+		if (settings.getGenerateRxJavaMethods()) {
 			methodBuilders.put(
 					RetrofitReturnStrategy.OBSERVABLE,
 					applyModifiers(MethodSpec.methodBuilder(methodName)));
@@ -92,11 +90,6 @@ public final class RetrofitMethodBuilder {
 
 	private MethodSpec.Builder applyModifiers(MethodSpec.Builder builder) {
 		return builder.addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
-	}
-
-
-	private boolean isMatchingReturnType(RetrofitReturnStrategy targetReturnType) {
-		return returnType.equals(targetReturnType) || returnType.equals(RetrofitReturnStrategy.ALL);
 	}
 
 }

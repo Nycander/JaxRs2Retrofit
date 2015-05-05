@@ -44,10 +44,13 @@ public final class Main {
 		if (commandLine.hasOption(OPTION_EXCLUDED_CLASSES)) excludedClassNamesRegex = commandLine.getOptionValue(OPTION_EXCLUDED_CLASSES);
 
 		RetrofitGenerator generator = new RetrofitGenerator(
-				RetrofitReturnStrategy.ALL,
-				"client",
-				excludedClassNamesRegex,
-				ParamConverterManager.getDefaultInstance());
+				new GeneratorSettings(
+						"client",
+						excludedClassNamesRegex,
+						true,
+						true,
+						true,
+						ParamConverterManager.getDefaultInstance()));
 
 		JavaProjectBuilder builder = new JavaProjectBuilder();
 		builder.addSourceTree(inputFile);

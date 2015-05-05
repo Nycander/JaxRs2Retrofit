@@ -27,7 +27,7 @@ public final class RetrofitMethodBuilderTest {
 	@Test
 	public void testAddAnnotation() {
 		AnnotationSpec annotation = AnnotationSpec.builder(ClassName.get(NotNull.class)).build();
-		Collection<MethodSpec> methodSpecs = createBuilder(RetrofitReturnStrategy.REGULAR)
+		Collection<MethodSpec> methodSpecs = createBuilder(new GeneratorSettings(null, null, true, false, false, null))
 				.addAnnotation(annotation)
 				.build().values();
 		Assert.assertEquals(1, methodSpecs.size());
@@ -40,7 +40,7 @@ public final class RetrofitMethodBuilderTest {
 	@Test
 	public void testAddParameter() {
 		ParameterSpec parameter = ParameterSpec.builder(ClassName.get(String.class), "testParam").build();
-				Collection < MethodSpec > methodSpecs = createBuilder(RetrofitReturnStrategy.REGULAR)
+				Collection < MethodSpec > methodSpecs = createBuilder(new GeneratorSettings(null, null, true, false, false, null))
 						.addParameter(parameter)
 						.build().values();
 		Assert.assertEquals(1, methodSpecs.size());
@@ -52,7 +52,7 @@ public final class RetrofitMethodBuilderTest {
 
 	@Test
 	public void testRegularReturnStrategy() {
-		Collection<MethodSpec> methodSpecs = createBuilder(RetrofitReturnStrategy.REGULAR).build().values();
+		Collection<MethodSpec> methodSpecs = createBuilder(new GeneratorSettings(null, null, true, false, false, null)).build().values();
 		Assert.assertEquals(1, methodSpecs.size());
 		testRegularReturnStrategy(methodSpecs.iterator().next());
 	}
@@ -60,7 +60,7 @@ public final class RetrofitMethodBuilderTest {
 
 	@Test
 	public void testObservableReturnStrategy() {
-		Collection<MethodSpec> methodSpecs = createBuilder(RetrofitReturnStrategy.OBSERVABLE).build().values();
+		Collection<MethodSpec> methodSpecs = createBuilder(new GeneratorSettings(null, null, false, false, true, null)).build().values();
 		Assert.assertEquals(1, methodSpecs.size());
 		testObservableReturnStrategy(methodSpecs.iterator().next());
 	}
@@ -68,7 +68,7 @@ public final class RetrofitMethodBuilderTest {
 
 	@Test
 	public void testCallbackReturnStrategy() {
-		Collection<MethodSpec> methodSpecs = createBuilder(RetrofitReturnStrategy.CALLBACK).build().values();
+		Collection<MethodSpec> methodSpecs = createBuilder(new GeneratorSettings(null, null, false, true, false, null)).build().values();
 		Assert.assertEquals(1, methodSpecs.size());
 		testCallbackReturnStrategy(methodSpecs.iterator().next());
 	}
@@ -76,7 +76,7 @@ public final class RetrofitMethodBuilderTest {
 
 	@Test
 	public void testAllReturnStrategy() {
-		Map<RetrofitReturnStrategy, MethodSpec> methodSpecs = createBuilder(RetrofitReturnStrategy.ALL).build();
+		Map<RetrofitReturnStrategy, MethodSpec> methodSpecs = createBuilder(new GeneratorSettings(null, null, true, true, true, null)).build();
 		Assert.assertEquals(3, methodSpecs.size());
 		Assert.assertTrue(methodSpecs.containsKey(RetrofitReturnStrategy.REGULAR));
 		Assert.assertTrue(methodSpecs.containsKey(RetrofitReturnStrategy.OBSERVABLE));
@@ -125,8 +125,8 @@ public final class RetrofitMethodBuilderTest {
 	}
 
 
-	private RetrofitMethodBuilder createBuilder(RetrofitReturnStrategy strategy) {
-		return new RetrofitMethodBuilder(METHOD_NAME, strategy)
+	private RetrofitMethodBuilder createBuilder(GeneratorSettings settings) {
+		return new RetrofitMethodBuilder(METHOD_NAME, settings)
 				.setReturnType(ClassName.get(String.class));
 	}
 
