@@ -146,7 +146,7 @@ jaxRs2Retrofit {
 }
 ```
 
-## Processing custom annotations
+### Processing custom annotations
 
 By default JaxRs2Retrofit will drop all parameter annotations that it does not know how to deal with, like `@Auth User user`. This behaviour can be customized registering a custom [`ParamConverter`](https://github.com/Maddoc42/JaxRs2Retrofit/blob/master/plugin/src/main/java/de/bitdroid/jaxrs2retrofit/converter/ParamConverter.java), for example in the build script:
 
