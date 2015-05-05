@@ -1,4 +1,4 @@
-package de.bitdroid.jaxrs2retrofit.example.resources;
+package de.bitdroid.jaxrs2retrofit.example.server;
 
 
 import javax.ws.rs.GET;

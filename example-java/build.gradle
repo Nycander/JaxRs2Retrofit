@@ -1,9 +1,6 @@
-import com.squareup.javapoet.ClassName
-import de.bitdroid.jaxrs2retrofit.converter.IgnoreConverter
-import javax.ws.rs.HeaderParam
-
 apply plugin: 'java'
 apply plugin: 'idea'
+apply plugin: 'application'
 apply plugin: 'de.bitdroid.jaxrs2retrofit'
 
 buildscript {
@@ -12,9 +9,11 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'de.bitdroid.jaxrs2retrofit:plugin:0.3.0'
+        classpath 'de.bitdroid.jaxrs2retrofit:plugin:0.4.0'
     }
 }
+
+mainClassName = 'de.bitdroid.jaxrs2retrofit.example.Main'
 
 def generatedSourcesDir = file('src/main/java-gen')
 
@@ -23,7 +22,9 @@ jaxRs2Retrofit {
     outputDir = generatedSourcesDir
     packageName = 'de.bitdroid.jaxrs2retrofit.example'
     excludedClassNamesRegex = "MyHiddenResource"
-    paramConverterManager.registerConverter(ClassName.get(HeaderParam.class), new IgnoreConverter());
+    generateSynchronousMethods = true
+    generateCallbackMethods = false
+    generateRxJavaMethods = false
 }
 
 idea {
@@ -34,5 +35,5 @@ idea {
 
 dependencies {
     compile 'com.squareup.retrofit:retrofit:1.9.0'
-    compile 'io.reactivex:rxjava:1.0.8'
+    compile project(':example-common')
 }

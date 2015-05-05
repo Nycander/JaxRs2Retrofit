@@ -1,5 +1,13 @@
 apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = "de.bitdroid.jaxrs2retrofit.example.server.HelloWorldApplication"
+
+run() {
+    args 'server', 'configuration.yml'
+}
 
 dependencies {
-    compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
+    compile 'io.dropwizard:dropwizard-core:0.8.1'
+    compile project(':example-common')
 }
