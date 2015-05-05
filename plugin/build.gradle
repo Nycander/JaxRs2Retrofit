@@ -50,7 +50,7 @@ jacocoTestReport {
 
 
 group = 'de.bitdroid.jaxrs2retrofit'
-version = '0.3.0'
+version = '0.4.0'
 
 
 publishing {
