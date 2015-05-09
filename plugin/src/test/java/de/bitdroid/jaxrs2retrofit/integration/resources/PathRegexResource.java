@@ -14,7 +14,7 @@ public interface PathRegexResource {
 	public String getRegex(@PathParam("path") String path, @PathParam("regex") String regex);
 
 	@GET
-	@Path("/path2")
+	@Path("/path-2")
 	public String getRegular();
 
 }

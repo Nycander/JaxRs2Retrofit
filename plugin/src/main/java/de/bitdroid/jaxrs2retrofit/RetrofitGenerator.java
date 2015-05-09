@@ -199,7 +199,14 @@ public final class RetrofitGenerator {
 	}
 
 
-	private final Pattern pathRegexPattern = Pattern.compile("\\{?(\\w+)(:[^\\{\\}]*)?\\}?");
+	/**
+	 * Regex for getting the indiviual parts of an JaxRs URL, explained from outer to most inner parts:
+	 * \\{? ... \\}?		outer { } in case of path variables
+	 * ( ... )(: ....)?		path followed by an optional JaxRx regex
+	 * [a-zA-z0-9-_.]		path regex (slightly limited to reduce complexity)
+	 * [^\\{\\}]*			JaxRs regex
+	 */
+	private final Pattern pathRegexPattern = Pattern.compile("\\{?([a-zA-z0-9-_.]+)(:[^\\{\\}]*)?\\}?");
 
 
 	private AnnotationSpec createPathAnnotation(

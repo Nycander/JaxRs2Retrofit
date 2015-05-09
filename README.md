@@ -63,7 +63,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'de.bitdroid.jaxrs2retrofit:plugin:0.4.0'
+        classpath 'de.bitdroid.jaxrs2retrofit:plugin:0.4.1'
     }
 }
 ```
